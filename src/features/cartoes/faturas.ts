@@ -32,6 +32,21 @@ export async function corrigirCompra(id: string, compra: Compra): Promise<Lancam
   return data
 }
 
+export type Atribuicao = components['schemas']['AtribuicaoResposta']
+
+/**
+ * HU-08: de quem é a compra; `pessoaId` null devolve ao dono. Com `proximas`, as próximas parcelas da mesma compra
+ * também (RN-17): as já gravadas mudam agora e as outras chegam atribuídas.
+ */
+export async function atribuirResponsavel(id: string, pessoaId: string | null, proximas: boolean): Promise<Atribuicao> {
+  const { data, error, response } = await api.PUT('/api/lancamentos/{id}/responsavel', {
+    params: { path: { id } },
+    body: { pessoaId: pessoaId ?? undefined, proximas },
+  })
+  if (!data) throw erroDaApi(error, response)
+  return data
+}
+
 export type Previa = components['schemas']['PreviaResposta']
 export type ItemPrevia = components['schemas']['ItemPreviaResposta']
 export type Importacao = components['schemas']['ImportacaoResposta']

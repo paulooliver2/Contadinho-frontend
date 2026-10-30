@@ -83,5 +83,11 @@ export const usePessoas = defineStore('pessoas', () => {
     },
   )
 
-  return { ativas, arquivadas, carregado, carregar, cadastrar, alterar, arquivar, desarquivar, excluir }
+  /** Como a pessoa aparece em listas curtas (responsável da compra): o apelido, ou o nome. */
+  function rotulo(id: string): string {
+    const pessoa = ativas.value.find((p) => p.id === id) ?? arquivadas.value.find((p) => p.id === id)
+    return pessoa ? (pessoa.apelido ?? pessoa.nome) : 'Pessoa'
+  }
+
+  return { ativas, arquivadas, carregado, carregar, cadastrar, alterar, arquivar, desarquivar, excluir, rotulo }
 })

@@ -36,6 +36,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/lancamentos/{id}/responsavel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["atribuir"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/pessoas": {
         parameters: {
             query?: never;
@@ -333,6 +349,18 @@ export interface components {
             finalCartao?: string;
             /** @enum {string} */
             origem: "ARQUIVO" | "MANUAL";
+            /** Format: uuid */
+            pessoaId?: string;
+        };
+        ResponsavelPedido: {
+            /** Format: uuid */
+            pessoaId?: string;
+            proximas?: boolean;
+        };
+        AtribuicaoResposta: {
+            lancamento: components["schemas"]["LancamentoResposta"];
+            /** Format: int32 */
+            proximas: number;
         };
         NovoCartaoPedido: {
             apelido?: string;
@@ -570,6 +598,32 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    atribuir: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResponsavelPedido"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AtribuicaoResposta"];
+                };
             };
         };
     };

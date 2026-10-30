@@ -13,9 +13,12 @@ export interface ItemDeFatura {
   finalCartao?: string
 }
 
-/** Uma compra da fatura. Com `clicavel`, vira botão (corrigir compra digitada, RN-60). */
-const props = defineProps<{ item: ItemDeFatura; selo?: string; clicavel?: boolean }>()
-const emit = defineEmits<{ abrir: [] }>()
+/**
+ * Uma compra da fatura. Com `clicavel`, vira botão (corrigir compra digitada, RN-60). Com `responsavel`, mostra de
+ * quem é a compra num botão à direita (HU-08).
+ */
+const props = defineProps<{ item: ItemDeFatura; selo?: string; clicavel?: boolean; responsavel?: string }>()
+const emit = defineEmits<{ abrir: []; responsavel: [] }>()
 
 const detalhes = computed(() => {
   const l = props.item
@@ -28,7 +31,7 @@ const detalhes = computed(() => {
 </script>
 
 <template>
-  <li>
+  <li class="fileira">
     <component
       :is="clicavel ? 'button' : 'div'"
       :type="clicavel ? 'button' : undefined"
@@ -46,6 +49,16 @@ const detalhes = computed(() => {
       </span>
       <span class="valor" :class="{ estorno: item.valor < 0 }">{{ reais(item.valor) }}</span>
     </component>
+    <button
+      v-if="responsavel"
+      type="button"
+      class="responsavel"
+      :class="{ dono: responsavel === 'Você' }"
+      :aria-label="`De quem é ${item.descricao}: ${responsavel}. Trocar`"
+      @click="emit('responsavel')"
+    >
+      {{ responsavel }}
+    </button>
   </li>
 </template>
 
@@ -58,8 +71,38 @@ li + li {
   border-top: 1px solid var(--divisoria);
 }
 
+.fileira {
+  display: flex;
+  align-items: center;
+}
+
+.responsavel {
+  flex: none;
+  max-width: 96px;
+  min-height: var(--toque-minimo);
+  margin-right: 10px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 14px;
+  background: var(--marca-clara);
+  color: var(--marca-escura);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.responsavel.dono {
+  background: var(--divisoria);
+  color: var(--texto-suave);
+}
+
 .linha {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   min-height: 56px;
   padding: 10px 16px;
   border: none;

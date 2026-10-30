@@ -9,14 +9,16 @@ import NavegadorMes from '@/components/NavegadorMes.vue'
 import TextoAjuda from '@/components/TextoAjuda.vue'
 import { diaMes, reais } from '@/lib/formatos'
 import type { Cartao } from '@/stores/cartoes'
+import { usePessoas } from '@/stores/pessoas'
 import CompraFolha from './CompraFolha.vue'
 import { buscarFatura, type Fatura, type Importacao, type Lancamento } from './faturas'
 import ImportarFolha from './ImportarFolha.vue'
 import LinhaLancamento from './LinhaLancamento.vue'
+import ResponsavelFolha from './ResponsavelFolha.vue'
 
 /**
  * A fatura do cartão, mês a mês, começando pela aberta (RN-58). As duas formas de registrar:
- * importar o arquivo do banco (HU-06) ou digitar compra por compra (HU-47).
+ * importar o arquivo do banco (HU-06) ou digitar compra por compra (HU-47). Cada compra mostra de quem é (HU-08).
  */
 const props = defineProps<{ cartao: Cartao }>()
 
@@ -30,6 +32,25 @@ const editando = ref<Lancamento | null>(null)
 const seletorArquivo = ref<HTMLInputElement>()
 const arquivo = ref<File | null>(null)
 const importarAberta = ref(false)
+const responsavelAberta = ref(false)
+const atribuindo = ref<Lancamento | null>(null)
+
+// Os nomes dos responsáveis e as opções de escolha vêm das pessoas cadastradas.
+const pessoas = usePessoas()
+if (!pessoas.carregado) {
+  pessoas.carregar().catch((e) => {
+    erroCarga.value = mensagemDeErro(e)
+  })
+}
+
+function responsavel(l: Lancamento): string {
+  return l.pessoaId ? pessoas.rotulo(l.pessoaId) : 'Você'
+}
+
+function trocarResponsavel(l: Lancamento) {
+  atribuindo.value = l
+  responsavelAberta.value = true
+}
 
 async function carregar() {
   const pedido = mes.value
@@ -124,7 +145,9 @@ function aoSalvar(mensagem: string) {
         :item="l"
         :selo="l.origem === 'MANUAL' ? 'digitada' : undefined"
         :clicavel="l.origem === 'MANUAL'"
+        :responsavel="pessoas.carregado ? responsavel(l) : undefined"
         @abrir="corrigir(l)"
+        @responsavel="trocarResponsavel(l)"
       />
     </ul>
     <EstadoVazio
@@ -136,6 +159,7 @@ function aoSalvar(mensagem: string) {
     </EstadoVazio>
 
     <ImportarFolha v-model:aberta="importarAberta" :cartao="cartao" :arquivo="arquivo" @importado="aoImportar" />
+    <ResponsavelFolha v-model:aberta="responsavelAberta" :lancamento="atribuindo" @salvo="aoSalvar" />
     <CompraFolha v-model:aberta="folhaAberta" :cartao-id="cartao.id" :fatura="fatura" :editando="editando" @salvo="aoSalvar" />
   </template>
 
