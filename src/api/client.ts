@@ -6,13 +6,14 @@ import type { paths } from './schema'
 export const api = createClient<paths>({ baseUrl: import.meta.env.VITE_API_URL })
 
 const autenticacao: Middleware = {
-  onRequest({ request }) {
-    const token = useSessao().tokenAcesso
+  async onRequest({ request }) {
+    // Renova antes de vencer, então o servidor quase nunca vê um token expirado.
+    const token = await useSessao().tokenValido()
     if (token) request.headers.set('Authorization', `Bearer ${token}`)
     return request
   },
-  onResponse({ response }) {
-    if (response.status === 401) useSessao().sair()
+  async onResponse({ response }) {
+    if (response.status === 401) await useSessao().encerrar()
     return response
   },
 }

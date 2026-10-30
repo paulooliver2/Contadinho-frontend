@@ -1,10 +1,21 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import TabBar from '@/components/TabBar.vue'
+import { useSessao } from '@/stores/sessao'
 
 const route = useRoute()
+const router = useRouter()
+const sessao = useSessao()
 const comAbas = computed(() => route.meta.abas === true)
+
+// Sessão encerrada no meio do uso (refresh vencido ou revogado): volta para o login (HU-01.4).
+watch(
+  () => sessao.logado,
+  (logado) => {
+    if (!logado && !route.meta.publica) router.replace({ name: 'entrar' })
+  },
+)
 </script>
 
 <template>

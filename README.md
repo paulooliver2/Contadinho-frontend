@@ -17,7 +17,7 @@ npm install
 npm run dev                 # no navegador, em http://localhost:5173
 ```
 
-Enquanto o login não existe, o botão "Entrar sem conta (desenvolvimento)" libera as abas. Ele só aparece no `npm run dev`.
+Para entrar, crie uma conta na tela de cadastro, com a API rodando. No navegador o refresh token fica no localStorage (o plugin não tem Keystore ali); no Android ele vai para o Keystore.
 
 ## Cliente da API
 
