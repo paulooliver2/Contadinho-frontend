@@ -5,6 +5,7 @@ import type { components } from '@/api/schema'
 export type Fatura = components['schemas']['FaturaResposta']
 export type Lancamento = components['schemas']['LancamentoResposta']
 export type Compra = components['schemas']['CompraPedido']
+export type Parte = components['schemas']['ParteResposta']
 
 /** A fatura de um mês de vencimento (RN-58). Sem compras, vem vazia com as datas calculadas. */
 export async function buscarFatura(cartaoId: string, mes: string): Promise<Fatura> {

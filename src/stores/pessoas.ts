@@ -89,5 +89,15 @@ export const usePessoas = defineStore('pessoas', () => {
     return pessoa ? (pessoa.apelido ?? pessoa.nome) : 'Pessoa'
   }
 
-  return { ativas, arquivadas, carregado, carregar, cadastrar, alterar, arquivar, desarquivar, excluir, rotulo }
+  /**
+   * Cor da pessoa na divisão da fatura (HU-10). Segue a pessoa, não a posição na fatura: é a ordem de nome entre
+   * todas as pessoas, então filtrar ou trocar de mês não repinta ninguém. Null é o dono.
+   */
+  function cor(id: string | null): string {
+    if (!id) return 'var(--serie-dono)'
+    const indice = [...ativas.value, ...arquivadas.value].sort(porNome).findIndex((p) => p.id === id)
+    return indice >= 0 && indice < 6 ? `var(--serie-${indice + 1})` : 'var(--serie-outras)'
+  }
+
+  return { ativas, arquivadas, carregado, carregar, cadastrar, alterar, arquivar, desarquivar, excluir, rotulo, cor }
 })

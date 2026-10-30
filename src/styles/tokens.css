@@ -25,6 +25,19 @@
   --escuro: #101915;
   --escuro-texto-suave: #A9B6B0;
 
+  /*
+   * Divisão da fatura (HU-10), sobre o card escuro: uma cor fixa por pessoa, nesta ordem, nunca repetida
+   * (validada contra #101915 para daltonismo e contraste). O dono é neutro; da 7ª pessoa em diante, "outras".
+   */
+  --serie-1: #3987E5;
+  --serie-2: #D95926;
+  --serie-3: #199E70;
+  --serie-4: #C98500;
+  --serie-5: #D55181;
+  --serie-6: #9085E9;
+  --serie-dono: #A9B6B0;
+  --serie-outras: #6E7B75;
+
   --fonte: 'Instrument Sans', system-ui, sans-serif;
   --fonte-numeros: 'IBM Plex Mono', ui-monospace, monospace;
 

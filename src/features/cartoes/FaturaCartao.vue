@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { mensagemDeErro } from '@/api/erros'
 import BotaoAcao from '@/components/BotaoAcao.vue'
 import CaixaAviso from '@/components/CaixaAviso.vue'
@@ -11,6 +11,7 @@ import { diaMes, reais } from '@/lib/formatos'
 import type { Cartao } from '@/stores/cartoes'
 import { usePessoas } from '@/stores/pessoas'
 import CompraFolha from './CompraFolha.vue'
+import DivisaoFatura from './DivisaoFatura.vue'
 import { buscarFatura, type Fatura, type Importacao, type Lancamento } from './faturas'
 import ImportarFolha from './ImportarFolha.vue'
 import LinhaLancamento from './LinhaLancamento.vue'
@@ -18,7 +19,8 @@ import ResponsavelFolha from './ResponsavelFolha.vue'
 
 /**
  * A fatura do cartão, mês a mês, começando pela aberta (RN-58). As duas formas de registrar:
- * importar o arquivo do banco (HU-06) ou digitar compra por compra (HU-47). Cada compra mostra de quem é (HU-08).
+ * importar o arquivo do banco (HU-06) ou digitar compra por compra (HU-47). Cada compra mostra de quem é (HU-08),
+ * e o total vem dividido por responsável, com filtro (HU-10).
  */
 const props = defineProps<{ cartao: Cartao }>()
 
@@ -34,6 +36,19 @@ const arquivo = ref<File | null>(null)
 const importarAberta = ref(false)
 const responsavelAberta = ref(false)
 const atribuindo = ref<Lancamento | null>(null)
+/** HU-10: id da pessoa, DONO para as compras sem responsável, ou null para todas. */
+const filtro = ref<string | null>(null)
+
+/** A divisão só aparece quando alguém além do dono tem compras na fatura. */
+const dividida = computed(() => fatura.value?.partes.some((p) => p.pessoaId) ?? false)
+
+const lancamentosVisiveis = computed(() => {
+  const todos = fatura.value?.lancamentos ?? []
+  if (!filtro.value) return todos
+  return todos.filter((l) => (l.pessoaId ?? 'DONO') === filtro.value)
+})
+
+const nomeDoFiltro = computed(() => (filtro.value === 'DONO' ? 'você' : filtro.value ? pessoas.rotulo(filtro.value) : ''))
 
 // Os nomes dos responsáveis e as opções de escolha vêm das pessoas cadastradas.
 const pessoas = usePessoas()
@@ -70,6 +85,7 @@ async function carregar() {
 // Trocar de mês limpa o aviso, exceto o da importação, que leva a tela para a fatura importada.
 let avisoAoTrocar = ''
 watch(mes, () => {
+  filtro.value = null
   aviso.value = avisoAoTrocar
   avisoAoTrocar = ''
   carregar()
@@ -108,9 +124,12 @@ function aoImportar(r: Importacao) {
   }
 }
 
-function aoSalvar(mensagem: string) {
+async function aoSalvar(mensagem: string) {
   aviso.value = mensagem
-  carregar()
+  await carregar()
+  // Quem ficou sem compras some da divisão; o filtro dele não mostraria nada.
+  const aindaExiste = fatura.value?.partes.some((p) => (p.pessoaId ?? 'DONO') === filtro.value)
+  if (!aindaExiste || !dividida.value) filtro.value = null
 }
 </script>
 
@@ -127,6 +146,7 @@ function aoSalvar(mensagem: string) {
       <p class="rotulo">Total da fatura</p>
       <p class="total">{{ reais(fatura.total) }}</p>
       <p class="datas">Fecha {{ diaMes(fatura.fechamento) }} · vence {{ diaMes(fatura.vencimento) }}</p>
+      <DivisaoFatura v-if="dividida && pessoas.carregado" v-model:filtro="filtro" :partes="fatura.partes" />
     </section>
 
     <div class="opcoes">
@@ -138,9 +158,14 @@ function aoSalvar(mensagem: string) {
 
     <CaixaAviso v-if="aviso" tom="sucesso" fechavel :mensagem="aviso" @fechar="aviso = ''" />
 
+    <p v-if="filtro" class="filtrando" role="status">
+      Só as compras de {{ nomeDoFiltro }}.
+      <button type="button" class="ver-todas" @click="filtro = null">Mostrar todas</button>
+    </p>
+
     <ul v-if="fatura.lancamentos.length > 0" class="lista" aria-label="Compras da fatura">
       <LinhaLancamento
-        v-for="l in fatura.lancamentos"
+        v-for="l in lancamentosVisiveis"
         :key="l.id"
         :item="l"
         :selo="l.origem === 'MANUAL' ? 'digitada' : undefined"
@@ -205,6 +230,27 @@ function aoSalvar(mensagem: string) {
   border-radius: var(--raio-card);
   background: var(--superficie);
   overflow: hidden;
+}
+
+.filtrando {
+  margin: 0;
+  font-size: 13px;
+  color: var(--texto-suave);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ver-todas {
+  min-height: var(--toque-minimo);
+  padding: 0 4px;
+  border: none;
+  background: transparent;
+  color: var(--marca);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .escondido {

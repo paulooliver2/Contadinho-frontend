@@ -491,7 +491,15 @@ export interface components {
             vencimento: string;
             aberta: boolean;
             total: number;
+            partes: components["schemas"]["ParteResposta"][];
             lancamentos: components["schemas"]["LancamentoResposta"][];
+        };
+        ParteResposta: {
+            /** Format: uuid */
+            pessoaId?: string;
+            total: number;
+            /** Format: int32 */
+            quantidade: number;
         };
         BancoResposta: {
             /** @enum {string} */
