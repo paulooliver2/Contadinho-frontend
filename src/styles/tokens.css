@@ -1,0 +1,34 @@
+/* Tokens tirados do protótipo (docs/Contadinho — app de finanças.html). */
+:root {
+  --fundo: #F2F4F3;
+  --superficie: #FFFFFF;
+  --texto: #101915;
+  --texto-suave: #55625C;
+  --rotulo: #3A4540;
+  --borda: #D5DCD8;
+  --divisoria: #EEF1EF;
+
+  --marca: #0A6B4B;
+  --marca-escura: #064A33;
+  --marca-clara: #DDF1E8;
+  --positivo: #7FD9B0;
+
+  --alerta: #A8410C;
+  --alerta-forte: #E07A3F;
+  --alerta-claro: #FCE3D3;
+  --info: #0E4566;
+  --info-claro: #E3F0F8;
+  --aviso: #6B4A00;
+  --aviso-claro: #FFF1C9;
+  --perigo: #B42318;
+
+  --escuro: #101915;
+  --escuro-texto-suave: #A9B6B0;
+
+  --fonte: 'Instrument Sans', system-ui, sans-serif;
+  --fonte-numeros: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --raio-card: 16px;
+  --raio-campo: 12px;
+  --toque-minimo: 44px; /* RNF-12 */
+}
