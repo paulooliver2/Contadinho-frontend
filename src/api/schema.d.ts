@@ -36,6 +36,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/cartoes/{cartaoId}/importacoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["importar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/cartoes/{cartaoId}/importacoes/previa": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["previa"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/cartoes/{cartaoId}/faturas/{mes}/lancamentos": {
         parameters: {
             query?: never;
@@ -248,6 +280,67 @@ export interface components {
             diaVencimento: number;
             faturaAberta: string;
         };
+        ConfirmacaoPedido: {
+            nomeArquivo: string;
+            conteudo: string;
+            mes: string;
+            mesmas: components["schemas"]["MesmaCompra"][];
+        };
+        MesmaCompra: {
+            idExterno: string;
+            /** Format: uuid */
+            lancamentoId: string;
+        };
+        ImportacaoResposta: {
+            /** Format: uuid */
+            id: string;
+            mes: string;
+            /** Format: int32 */
+            novos: number;
+            /** Format: int32 */
+            jaExistiam: number;
+            /** Format: int32 */
+            casadas: number;
+        };
+        PreviaPedido: {
+            nomeArquivo: string;
+            conteudo: string;
+            mes?: string;
+        };
+        ItemPreviaResposta: {
+            idExterno: string;
+            /** Format: date */
+            data: string;
+            descricao: string;
+            valor: number;
+            /** Format: int32 */
+            parcelaAtual?: number;
+            /** Format: int32 */
+            parcelaTotal?: number;
+            jaExiste: boolean;
+            parecida?: components["schemas"]["ParecidaResposta"];
+        };
+        ParecidaResposta: {
+            /** Format: uuid */
+            id: string;
+            descricao: string;
+        };
+        PreviaResposta: {
+            mes: string;
+            /** Format: date */
+            fechamento: string;
+            /** Format: date */
+            vencimento: string;
+            /** Format: int32 */
+            novos: number;
+            /** Format: int32 */
+            jaExistiam: number;
+            /** Format: int32 */
+            ignorados: number;
+            totalLido: number;
+            totalArquivo?: number;
+            itens: components["schemas"]["ItemPreviaResposta"][];
+        };
         SessaoPedido: {
             refreshToken: string;
         };
@@ -393,6 +486,58 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CartaoResposta"];
+                };
+            };
+        };
+    };
+    importar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cartaoId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmacaoPedido"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportacaoResposta"];
+                };
+            };
+        };
+    };
+    previa: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cartaoId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreviaPedido"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreviaResposta"];
                 };
             };
         };

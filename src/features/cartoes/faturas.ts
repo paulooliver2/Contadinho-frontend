@@ -32,6 +32,53 @@ export async function corrigirCompra(id: string, compra: Compra): Promise<Lancam
   return data
 }
 
+export type Previa = components['schemas']['PreviaResposta']
+export type ItemPrevia = components['schemas']['ItemPreviaResposta']
+export type Importacao = components['schemas']['ImportacaoResposta']
+
+/** O arquivo escolhido, em base64: o servidor precisa dos bytes como vieram (o OFX 1 costuma ser windows-1252). */
+export interface ArquivoLido {
+  nomeArquivo: string
+  conteudo: string
+}
+
+export function lerArquivo(arquivo: File): Promise<ArquivoLido> {
+  return new Promise((resolver, rejeitar) => {
+    const leitor = new FileReader()
+    leitor.onload = () => {
+      const url = String(leitor.result)
+      resolver({ nomeArquivo: arquivo.name, conteudo: url.slice(url.indexOf(',') + 1) })
+    }
+    leitor.onerror = () => rejeitar(leitor.error)
+    leitor.readAsDataURL(arquivo)
+  })
+}
+
+/** HU-06: lê o arquivo e mostra o que vai entrar, sem gravar. Sem `mes`, o servidor sugere a fatura (RN-09). */
+export async function previaImportacao(cartaoId: string, arquivo: ArquivoLido, mes?: string): Promise<Previa> {
+  const { data, error, response } = await api.POST('/api/cartoes/{cartaoId}/importacoes/previa', {
+    params: { path: { cartaoId } },
+    body: { ...arquivo, mes },
+  })
+  if (!data) throw erroDaApi(error, response)
+  return data
+}
+
+/** `mesmas`: as compras do arquivo que o dono confirmou serem a digitada apontada na prévia (RN-59). */
+export async function importarFatura(
+  cartaoId: string,
+  arquivo: ArquivoLido,
+  mes: string,
+  mesmas: { idExterno: string; lancamentoId: string }[],
+): Promise<Importacao> {
+  const { data, error, response } = await api.POST('/api/cartoes/{cartaoId}/importacoes', {
+    params: { path: { cartaoId } },
+    body: { ...arquivo, mes, mesmas },
+  })
+  if (!data) throw erroDaApi(error, response)
+  return data
+}
+
 export async function excluirCompra(id: string): Promise<void> {
   const { error, response } = await api.DELETE('/api/lancamentos/{id}', { params: { path: { id } } })
   if (!response.ok) throw erroDaApi(error, response)

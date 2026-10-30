@@ -10,12 +10,13 @@ import TextoAjuda from '@/components/TextoAjuda.vue'
 import { diaMes, reais } from '@/lib/formatos'
 import type { Cartao } from '@/stores/cartoes'
 import CompraFolha from './CompraFolha.vue'
-import { buscarFatura, type Fatura, type Lancamento } from './faturas'
+import { buscarFatura, type Fatura, type Importacao, type Lancamento } from './faturas'
+import ImportarFolha from './ImportarFolha.vue'
 import LinhaLancamento from './LinhaLancamento.vue'
 
 /**
  * A fatura do cartão, mês a mês, começando pela aberta (RN-58). As duas formas de registrar:
- * importar o arquivo do banco (HU-06, em construção) ou digitar compra por compra (HU-47).
+ * importar o arquivo do banco (HU-06) ou digitar compra por compra (HU-47).
  */
 const props = defineProps<{ cartao: Cartao }>()
 
@@ -26,6 +27,9 @@ const erroCarga = ref('')
 const aviso = ref('')
 const folhaAberta = ref(false)
 const editando = ref<Lancamento | null>(null)
+const seletorArquivo = ref<HTMLInputElement>()
+const arquivo = ref<File | null>(null)
+const importarAberta = ref(false)
 
 async function carregar() {
   const pedido = mes.value
@@ -42,8 +46,11 @@ async function carregar() {
   }
 }
 
+// Trocar de mês limpa o aviso, exceto o da importação, que leva a tela para a fatura importada.
+let avisoAoTrocar = ''
 watch(mes, () => {
-  aviso.value = ''
+  aviso.value = avisoAoTrocar
+  avisoAoTrocar = ''
   carregar()
 }, { immediate: true })
 
@@ -55,6 +62,29 @@ function novaCompra() {
 function corrigir(lancamento: Lancamento) {
   editando.value = lancamento
   folhaAberta.value = true
+}
+
+function escolheuArquivo(evento: Event) {
+  const campo = evento.target as HTMLInputElement
+  arquivo.value = campo.files?.[0] ?? null
+  // Limpa para que escolher o mesmo arquivo de novo também dispare o evento.
+  campo.value = ''
+  if (arquivo.value) importarAberta.value = true
+}
+
+/** HU-07: "X novos, Y já existiam". A tela vai para a fatura que recebeu as compras. */
+function aoImportar(r: Importacao) {
+  const partes = [`${r.novos} ${r.novos === 1 ? 'nova' : 'novas'}`]
+  if (r.casadas > 0) partes.push(`${r.casadas} ${r.casadas === 1 ? 'digitada confirmada' : 'digitadas confirmadas'}`)
+  partes.push(`${r.jaExistiam} já ${r.jaExistiam === 1 ? 'existia' : 'existiam'}`)
+  const mensagem = `Fatura importada: ${partes.join(', ')}.`
+  if (mes.value === r.mes) {
+    aviso.value = mensagem
+    carregar()
+  } else {
+    avisoAoTrocar = mensagem
+    mes.value = r.mes
+  }
 }
 
 function aoSalvar(mensagem: string) {
@@ -79,15 +109,23 @@ function aoSalvar(mensagem: string) {
     </section>
 
     <div class="opcoes">
-      <BotaoAcao variante="secundario" desativado>Importar arquivo</BotaoAcao>
+      <BotaoAcao variante="secundario" @click="seletorArquivo?.click()">Importar arquivo</BotaoAcao>
       <BotaoAcao @click="novaCompra">Adicionar compra</BotaoAcao>
     </div>
-    <TextoAjuda>A importação de OFX ou CSV está em construção. Por enquanto, digite as compras; depois, ao importar, o app aponta as que parecem iguais e você decide.</TextoAjuda>
+    <input ref="seletorArquivo" type="file" class="escondido" tabindex="-1" aria-hidden="true" @change="escolheuArquivo" />
+    <TextoAjuda>Importe o OFX baixado no app do banco ou digite as compras. Se importar depois de digitar, o app aponta as que parecem iguais e você decide.</TextoAjuda>
 
     <CaixaAviso v-if="aviso" tom="sucesso" fechavel :mensagem="aviso" @fechar="aviso = ''" />
 
     <ul v-if="fatura.lancamentos.length > 0" class="lista" aria-label="Compras da fatura">
-      <LinhaLancamento v-for="l in fatura.lancamentos" :key="l.id" :lancamento="l" @abrir="corrigir" />
+      <LinhaLancamento
+        v-for="l in fatura.lancamentos"
+        :key="l.id"
+        :item="l"
+        :selo="l.origem === 'MANUAL' ? 'digitada' : undefined"
+        :clicavel="l.origem === 'MANUAL'"
+        @abrir="corrigir(l)"
+      />
     </ul>
     <EstadoVazio
       v-else
@@ -97,6 +135,7 @@ function aoSalvar(mensagem: string) {
       <template #icone><IconeCartao :tamanho="28" /></template>
     </EstadoVazio>
 
+    <ImportarFolha v-model:aberta="importarAberta" :cartao="cartao" :arquivo="arquivo" @importado="aoImportar" />
     <CompraFolha v-model:aberta="folhaAberta" :cartao-id="cartao.id" :fatura="fatura" :editando="editando" @salvo="aoSalvar" />
   </template>
 
@@ -142,6 +181,10 @@ function aoSalvar(mensagem: string) {
   border-radius: var(--raio-card);
   background: var(--superficie);
   overflow: hidden;
+}
+
+.escondido {
+  display: none;
 }
 
 .carregando {

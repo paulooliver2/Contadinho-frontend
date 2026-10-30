@@ -1,15 +1,22 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { diaMes, reais } from '@/lib/formatos'
-import type { Lancamento } from './faturas'
 
-/** Uma compra da fatura. A digitada abre para correção (RN-60); a do arquivo, por enquanto, só aparece. */
-const props = defineProps<{ lancamento: Lancamento }>()
-const emit = defineEmits<{ abrir: [lancamento: Lancamento] }>()
+/** O que uma linha precisa: serve para o lançamento gravado e para o item da prévia da importação. */
+export interface ItemDeFatura {
+  data: string
+  descricao: string
+  valor: number
+  parcelaAtual?: number
+  parcelaTotal?: number
+}
 
-const digitada = computed(() => props.lancamento.origem === 'MANUAL')
+/** Uma compra da fatura. Com `clicavel`, vira botão (corrigir compra digitada, RN-60). */
+const props = defineProps<{ item: ItemDeFatura; selo?: string; clicavel?: boolean }>()
+const emit = defineEmits<{ abrir: [] }>()
+
 const detalhes = computed(() => {
-  const l = props.lancamento
+  const l = props.item
   const partes = [diaMes(l.data)]
   if (l.parcelaAtual && l.parcelaTotal) partes.push(`parcela ${l.parcelaAtual}/${l.parcelaTotal}`)
   if (l.valor < 0) partes.push('estorno')
@@ -20,21 +27,21 @@ const detalhes = computed(() => {
 <template>
   <li>
     <component
-      :is="digitada ? 'button' : 'div'"
-      :type="digitada ? 'button' : undefined"
+      :is="clicavel ? 'button' : 'div'"
+      :type="clicavel ? 'button' : undefined"
       class="linha"
-      :class="{ clicavel: digitada }"
-      :aria-label="digitada ? `Corrigir ${lancamento.descricao}` : undefined"
-      @click="digitada && emit('abrir', lancamento)"
+      :class="{ clicavel }"
+      :aria-label="clicavel ? `Corrigir ${item.descricao}` : undefined"
+      @click="clicavel && emit('abrir')"
     >
       <span class="textos">
-        <span class="descricao">{{ lancamento.descricao }}</span>
+        <span class="descricao">{{ item.descricao }}</span>
         <span class="detalhes">
           {{ detalhes }}
-          <span v-if="digitada" class="selo">digitada</span>
+          <span v-if="selo" class="selo">{{ selo }}</span>
         </span>
       </span>
-      <span class="valor" :class="{ estorno: lancamento.valor < 0 }">{{ reais(lancamento.valor) }}</span>
+      <span class="valor" :class="{ estorno: item.valor < 0 }">{{ reais(item.valor) }}</span>
     </component>
   </li>
 </template>
