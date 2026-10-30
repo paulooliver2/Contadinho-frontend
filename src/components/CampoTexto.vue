@@ -3,7 +3,7 @@ import { computed, ref, useId } from 'vue'
 
 const props = defineProps<{
   rotulo: string
-  tipo?: 'text' | 'email' | 'password' | 'date'
+  tipo?: 'text' | 'email' | 'password' | 'date' | 'tel'
   autocomplete?: string
   placeholder?: string
   /** Mensagem embaixo do campo; também marca o campo como inválido para leitores de tela. */

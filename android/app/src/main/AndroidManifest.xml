@@ -39,4 +39,6 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- HU-16: ler o contato escolhido na agenda (o app nunca lê a agenda inteira). -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 </manifest>
