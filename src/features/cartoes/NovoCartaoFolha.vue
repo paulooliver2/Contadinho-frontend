@@ -9,6 +9,7 @@ import FolhaInferior from '@/components/FolhaInferior.vue'
 import FormularioEmpilhado from '@/components/FormularioEmpilhado.vue'
 import LinhaCampos from '@/components/LinhaCampos.vue'
 import TextoAjuda from '@/components/TextoAjuda.vue'
+import { useErrosDeCampos } from '@/lib/errosDeCampos'
 import { useCartoes, type Banco, type Cartao } from '@/stores/cartoes'
 
 const aberta = defineModel<boolean>('aberta', { required: true })
@@ -22,7 +23,7 @@ const apelido = ref('')
 const ultimos4 = ref('')
 const fechamento = ref('')
 const vencimento = ref('')
-const erros = ref<Record<string, string>>({})
+const erros = useErrosDeCampos({ banco, apelido, ultimos4, diaFechamento: fechamento, diaVencimento: vencimento })
 const erro = ref('')
 const enviando = ref(false)
 
@@ -34,16 +35,6 @@ watch(aberta, (abriu) => {
   erros.value = {}
   erro.value = ''
 })
-
-// O erro de um campo some assim que ele é editado.
-const campos = { banco, apelido, ultimos4, diaFechamento: fechamento, diaVencimento: vencimento }
-for (const [chave, campo] of Object.entries(campos)) {
-  watch(campo, () => {
-    if (!(chave in erros.value)) return
-    const { [chave]: _removido, ...resto } = erros.value
-    erros.value = resto
-  })
-}
 
 const opcoesBanco = computed(() => cartoes.bancos.map((b) => ({ valor: b.codigo, rotulo: b.nome })))
 

@@ -3,14 +3,18 @@ import { computed, ref, useId } from 'vue'
 
 const props = defineProps<{
   rotulo: string
-  tipo?: 'text' | 'email' | 'password'
+  tipo?: 'text' | 'email' | 'password' | 'date'
   autocomplete?: string
   placeholder?: string
   /** Mensagem embaixo do campo; também marca o campo como inválido para leitores de tela. */
   erro?: string
   /** Só dígitos (final do cartão, dia): teclado numérico e fonte de números. */
   numerico?: boolean
+  /** Valor em reais: teclado com vírgula e fonte de números. */
+  decimal?: boolean
   maxlength?: number
+  /** Data máxima, em yyyy-MM-dd, quando `tipo` é date. */
+  max?: string
 }>()
 
 const valor = defineModel<string>({ required: true })
@@ -31,13 +35,14 @@ const tipoAtual = computed(() => (ehSenha.value && senhaVisivel.value ? 'text' :
         v-model="valor"
         :type="tipoAtual"
         :autocomplete="autocomplete"
-        :inputmode="numerico ? 'numeric' : tipo === 'email' ? 'email' : undefined"
+        :inputmode="numerico ? 'numeric' : decimal ? 'decimal' : tipo === 'email' ? 'email' : undefined"
         :autocapitalize="tipo === 'email' || ehSenha ? 'off' : undefined"
         :maxlength="maxlength"
+        :max="max"
         :placeholder="placeholder"
         :aria-invalid="erro ? true : undefined"
         :aria-describedby="erro ? idErro : undefined"
-        :class="{ 'com-botao': ehSenha, invalido: erro, numerico }"
+        :class="{ 'com-botao': ehSenha, invalido: erro, numerico: numerico || decimal }"
       />
       <button
         v-if="ehSenha"

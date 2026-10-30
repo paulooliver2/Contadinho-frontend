@@ -58,4 +58,11 @@ withDefaults(
   background: var(--superficie);
   color: var(--texto);
 }
+
+.secundario:disabled {
+  border-style: dashed;
+  background: transparent;
+  color: var(--texto-suave);
+  cursor: default;
+}
 </style>

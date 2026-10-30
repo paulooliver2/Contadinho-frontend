@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+    "/api/lancamentos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["corrigir"];
+        post?: never;
+        delete: operations["excluir"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/cartoes": {
         parameters: {
             query?: never;
@@ -14,6 +30,22 @@ export interface paths {
         get: operations["listar"];
         put?: never;
         post: operations["cadastrar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/cartoes/{cartaoId}/faturas/{mes}/lancamentos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["adicionar"];
         delete?: never;
         options?: never;
         head?: never;
@@ -132,6 +164,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/cartoes/{cartaoId}/faturas/{mes}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ver"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/cartoes/bancos": {
         parameters: {
             query?: never;
@@ -152,6 +200,30 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        CompraPedido: {
+            /** Format: date */
+            data: string;
+            descricao: string;
+            valor: number;
+            /** Format: int32 */
+            parcelaAtual?: number;
+            /** Format: int32 */
+            parcelaTotal?: number;
+        };
+        LancamentoResposta: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            data: string;
+            descricao: string;
+            valor: number;
+            /** Format: int32 */
+            parcelaAtual?: number;
+            /** Format: int32 */
+            parcelaTotal?: number;
+            /** @enum {string} */
+            origem: "ARQUIVO" | "MANUAL";
+        };
         NovoCartaoPedido: {
             apelido?: string;
             /** @enum {string} */
@@ -174,6 +246,7 @@ export interface components {
             diaFechamento: number;
             /** Format: int32 */
             diaVencimento: number;
+            faturaAberta: string;
         };
         SessaoPedido: {
             refreshToken: string;
@@ -208,6 +281,16 @@ export interface components {
             nome: string;
             email: string;
         };
+        FaturaResposta: {
+            mes: string;
+            /** Format: date */
+            fechamento: string;
+            /** Format: date */
+            vencimento: string;
+            aberta: boolean;
+            total: number;
+            lancamentos: components["schemas"]["LancamentoResposta"][];
+        };
         BancoResposta: {
             /** @enum {string} */
             codigo: "NUBANK" | "ITAU" | "BRADESCO" | "BANCO_DO_BRASIL" | "CAIXA" | "SANTANDER" | "INTER" | "C6" | "BTG" | "MERCADO_PAGO" | "OUTRO";
@@ -224,6 +307,52 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    corrigir: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompraPedido"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LancamentoResposta"];
+                };
+            };
+        };
+    };
+    excluir: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     listar: {
         parameters: {
             query?: never;
@@ -264,6 +393,33 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CartaoResposta"];
+                };
+            };
+        };
+    };
+    adicionar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cartaoId: string;
+                mes: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompraPedido"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LancamentoResposta"];
                 };
             };
         };
@@ -422,6 +578,29 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Conta"];
+                };
+            };
+        };
+    };
+    ver: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cartaoId: string;
+                mes: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FaturaResposta"];
                 };
             };
         };

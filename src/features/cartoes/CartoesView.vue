@@ -7,6 +7,7 @@ import CaixaAviso from '@/components/CaixaAviso.vue'
 import EstadoVazio from '@/components/EstadoVazio.vue'
 import IconeCartao from '@/components/IconeCartao.vue'
 import { useCartoes, type Cartao } from '@/stores/cartoes'
+import FaturaCartao from './FaturaCartao.vue'
 import NovoCartaoFolha from './NovoCartaoFolha.vue'
 import ResumoCartao from './ResumoCartao.vue'
 import SeletorCartoes from './SeletorCartoes.vue'
@@ -63,6 +64,7 @@ function aoCadastrar(cartao: Cartao) {
       />
       <CaixaAviso v-if="aviso" tom="sucesso" fechavel :mensagem="aviso" @fechar="aviso = ''" />
       <ResumoCartao :cartao="selecionado" />
+      <FaturaCartao :key="selecionado.id" :cartao="selecionado" />
     </template>
 
     <NovoCartaoFolha v-model:aberta="folhaAberta" @cadastrado="aoCadastrar" />

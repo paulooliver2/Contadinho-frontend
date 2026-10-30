@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import EstadoVazio from '@/components/EstadoVazio.vue'
-import IconeCartao from '@/components/IconeCartao.vue'
 import type { Cartao } from '@/stores/cartoes'
 
-/** Cabeçalho do cartão escolhido. Por enquanto sem fatura: a importação é a HU-06. */
+/** Cabeçalho do cartão escolhido; a fatura vem logo abaixo, no FaturaCartao. */
 defineProps<{ cartao: Cartao }>()
 </script>
 
@@ -12,13 +10,6 @@ defineProps<{ cartao: Cartao }>()
     <p class="titulo">{{ cartao.apelido }} <span class="final">•• {{ cartao.ultimos4 }}</span></p>
     <p class="dias">Fecha dia {{ cartao.diaFechamento }} · vence dia {{ cartao.diaVencimento }}</p>
   </section>
-
-  <EstadoVazio
-    titulo="Nenhuma fatura importada"
-    :texto="`Baixe a fatura em OFX ou CSV no app do ${cartao.banco === 'OUTRO' ? 'seu banco' : cartao.bancoNome}. A importação de faturas ainda está em construção.`"
-  >
-    <template #icone><IconeCartao :tamanho="28" /></template>
-  </EstadoVazio>
 </template>
 
 <style scoped>
