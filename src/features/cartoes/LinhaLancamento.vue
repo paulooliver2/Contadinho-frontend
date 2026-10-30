@@ -9,6 +9,8 @@ export interface ItemDeFatura {
   valor: number
   parcelaAtual?: number
   parcelaTotal?: number
+  /** Final do cartão que fez a compra, quando o arquivo traz (RN-19). */
+  finalCartao?: string
 }
 
 /** Uma compra da fatura. Com `clicavel`, vira botão (corrigir compra digitada, RN-60). */
@@ -18,6 +20,7 @@ const emit = defineEmits<{ abrir: [] }>()
 const detalhes = computed(() => {
   const l = props.item
   const partes = [diaMes(l.data)]
+  if (l.finalCartao) partes.push(`•• ${l.finalCartao}`)
   if (l.parcelaAtual && l.parcelaTotal) partes.push(`parcela ${l.parcelaAtual}/${l.parcelaTotal}`)
   if (l.valor < 0) partes.push('estorno')
   return partes.join(' · ')

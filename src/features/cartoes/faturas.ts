@@ -36,10 +36,14 @@ export type Previa = components['schemas']['PreviaResposta']
 export type ItemPrevia = components['schemas']['ItemPreviaResposta']
 export type Importacao = components['schemas']['ImportacaoResposta']
 
-/** O arquivo escolhido, em base64: o servidor precisa dos bytes como vieram (o OFX 1 costuma ser windows-1252). */
+/**
+ * O arquivo escolhido, em base64: o servidor precisa dos bytes como vieram. `senha` só existe quando o PDF tem
+ * uma (HU-39); fica na memória da folha de importação e não é guardada.
+ */
 export interface ArquivoLido {
   nomeArquivo: string
   conteudo: string
+  senha?: string
 }
 
 export function lerArquivo(arquivo: File): Promise<ArquivoLido> {

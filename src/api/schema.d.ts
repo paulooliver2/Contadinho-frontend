@@ -253,6 +253,7 @@ export interface components {
             parcelaAtual?: number;
             /** Format: int32 */
             parcelaTotal?: number;
+            finalCartao?: string;
             /** @enum {string} */
             origem: "ARQUIVO" | "MANUAL";
         };
@@ -283,6 +284,7 @@ export interface components {
         ConfirmacaoPedido: {
             nomeArquivo: string;
             conteudo: string;
+            senha?: string;
             mes: string;
             mesmas: components["schemas"]["MesmaCompra"][];
         };
@@ -305,6 +307,7 @@ export interface components {
         PreviaPedido: {
             nomeArquivo: string;
             conteudo: string;
+            senha?: string;
             mes?: string;
         };
         ItemPreviaResposta: {
@@ -317,6 +320,7 @@ export interface components {
             parcelaAtual?: number;
             /** Format: int32 */
             parcelaTotal?: number;
+            finalCartao?: string;
             jaExiste: boolean;
             parecida?: components["schemas"]["ParecidaResposta"];
         };

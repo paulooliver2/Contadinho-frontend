@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { mensagemDeErro } from '@/api/erros'
+import { ErroApi, mensagemDeErro } from '@/api/erros'
 import BotaoAcao from '@/components/BotaoAcao.vue'
 import CaixaAviso from '@/components/CaixaAviso.vue'
+import CampoTexto from '@/components/CampoTexto.vue'
 import FolhaInferior from '@/components/FolhaInferior.vue'
+import FormularioEmpilhado from '@/components/FormularioEmpilhado.vue'
 import NavegadorMes from '@/components/NavegadorMes.vue'
 import TextoAjuda from '@/components/TextoAjuda.vue'
 import { reais } from '@/lib/formatos'
@@ -13,8 +15,8 @@ import { importarFatura, lerArquivo, previaImportacao, type ArquivoLido, type Im
 import LinhaLancamento from './LinhaLancamento.vue'
 
 /**
- * Importar a fatura (HU-06): prévia com a fatura de destino, os totais e as compras parecidas com as digitadas,
- * que o dono decide uma a uma (RN-59). PDF não é lido nem enviado (HU-39).
+ * Importar a fatura em PDF ou OFX (HU-06, HU-39): prévia com a fatura de destino, os totais e as compras parecidas
+ * com as digitadas, que o dono decide uma a uma (RN-59). PDF com senha pede a senha antes da prévia.
  */
 const props = defineProps<{ cartao: Cartao; arquivo: File | null }>()
 const aberta = defineModel<boolean>('aberta', { required: true })
@@ -24,12 +26,12 @@ const lido = ref<ArquivoLido | null>(null)
 const previa = ref<Previa | null>(null)
 const mes = ref('')
 const decisoes = ref<Record<string, 'MESMA' | 'OUTRA' | null>>({})
-const ehPdf = ref(false)
 const carregando = ref(false)
 const enviando = ref(false)
 const erro = ref('')
-
-const banco = computed(() => (props.cartao.banco === 'OUTRO' ? 'do seu banco' : `do ${props.cartao.bancoNome}`))
+const pedeSenha = ref(false)
+const senha = ref('')
+const erroSenha = ref('')
 
 watch(aberta, async (abriu) => {
   if (!abriu || !props.arquivo) return
@@ -38,8 +40,9 @@ watch(aberta, async (abriu) => {
   mes.value = ''
   decisoes.value = {}
   erro.value = ''
-  ehPdf.value = props.arquivo.name.toLowerCase().endsWith('.pdf') || props.arquivo.type === 'application/pdf'
-  if (ehPdf.value) return
+  pedeSenha.value = false
+  senha.value = ''
+  erroSenha.value = ''
   try {
     lido.value = await lerArquivo(props.arquivo)
   } catch {
@@ -60,10 +63,27 @@ async function carregar(destino?: string) {
     // Trocar a fatura muda quais digitadas parecem iguais; as decisões recomeçam.
     decisoes.value = Object.fromEntries(lida.itens.filter((i) => i.parecida).map((i) => [i.idExterno, null]))
   } catch (e) {
-    erro.value = mensagemDeErro(e)
+    // HU-39: o PDF tem senha (ou a digitada não abriu); a folha mostra o campo da senha.
+    if (e instanceof ErroApi && (e.codigo === 'SENHA_PDF' || e.codigo === 'SENHA_PDF_INCORRETA')) {
+      pedeSenha.value = true
+      erroSenha.value = e.codigo === 'SENHA_PDF_INCORRETA' ? e.message : ''
+    } else {
+      erro.value = mensagemDeErro(e)
+    }
   } finally {
     carregando.value = false
   }
+}
+
+function abrirComSenha() {
+  if (!lido.value || carregando.value) return
+  if (!senha.value) {
+    erroSenha.value = 'Digite a senha do PDF.'
+    return
+  }
+  erroSenha.value = ''
+  lido.value = { ...lido.value, senha: senha.value }
+  carregar()
 }
 
 function trocarFatura(novo: string) {
@@ -109,17 +129,15 @@ async function confirmar() {
 
 <template>
   <FolhaInferior v-model:aberta="aberta" titulo="Importar fatura">
-    <template v-if="ehPdf">
-      <CaixaAviso mensagem="PDF não é aceito: o app não abre o arquivo nem pede a senha dele." />
-      <TextoAjuda>
-        No app {{ banco }}, abra a fatura e procure "Exportar" ou "Baixar fatura". Escolha o formato OFX
-        (às vezes chamado de "Money" ou "Quicken") e importe esse arquivo aqui.
-      </TextoAjuda>
-      <BotaoAcao variante="secundario" @click="aberta = false">Entendi</BotaoAcao>
-    </template>
+    <p class="arquivo">{{ arquivo?.name }}</p>
+
+    <FormularioEmpilhado v-if="pedeSenha && !previa" @enviar="abrirComSenha">
+      <TextoAjuda>Este PDF tem senha. Ela só é usada para abrir o arquivo e não fica guardada no app.</TextoAjuda>
+      <CampoTexto v-model="senha" rotulo="Senha do PDF" tipo="password" autocomplete="off" :erro="erroSenha" />
+      <BotaoAcao tipo="submit" :carregando="carregando" texto-carregando="Abrindo…">Abrir fatura</BotaoAcao>
+    </FormularioEmpilhado>
 
     <template v-else>
-      <p class="arquivo">{{ arquivo?.name }}</p>
 
       <NavegadorMes v-if="mes" :model-value="mes" rotulo="Fatura de destino" detalhe="destino" @update:model-value="trocarFatura" />
 

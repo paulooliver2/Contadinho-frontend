@@ -113,7 +113,7 @@ function aoSalvar(mensagem: string) {
       <BotaoAcao @click="novaCompra">Adicionar compra</BotaoAcao>
     </div>
     <input ref="seletorArquivo" type="file" class="escondido" tabindex="-1" aria-hidden="true" @change="escolheuArquivo" />
-    <TextoAjuda>Importe o OFX baixado no app do banco ou digite as compras. Se importar depois de digitar, o app aponta as que parecem iguais e você decide.</TextoAjuda>
+    <TextoAjuda>Importe o PDF ou o OFX da fatura baixado no app do banco, ou digite as compras. Se importar depois de digitar, o app aponta as que parecem iguais e você decide.</TextoAjuda>
 
     <CaixaAviso v-if="aviso" tom="sucesso" fechavel :mensagem="aviso" @fechar="aviso = ''" />
 

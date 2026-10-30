@@ -3,23 +3,27 @@ export class ErroApi extends Error {
   readonly status: number
   /** Campo → mensagem, nos erros de validação. */
   readonly campos: Record<string, string>
+  /** O que o app deve fazer em seguida, quando a API diz (ex.: SENHA_PDF pede a senha do arquivo). */
+  readonly codigo?: string
 
-  constructor(status: number, mensagem: string, campos: Record<string, string> = {}) {
+  constructor(status: number, mensagem: string, campos: Record<string, string> = {}, codigo?: string) {
     super(mensagem)
     this.status = status
     this.campos = campos
+    this.codigo = codigo
   }
 }
 
 interface Problema {
   detail?: string
   campos?: Record<string, string>
+  codigo?: string
 }
 
 /** Monta o erro a partir do `error` e do `response` que o openapi-fetch devolve. */
 export function erroDaApi(corpo: unknown, resposta: Response): ErroApi {
   const problema = (typeof corpo === 'object' && corpo !== null ? corpo : {}) as Problema
-  return new ErroApi(resposta.status, problema.detail ?? 'Algo deu errado. Tente de novo.', problema.campos)
+  return new ErroApi(resposta.status, problema.detail ?? 'Algo deu errado. Tente de novo.', problema.campos, problema.codigo)
 }
 
 export function mensagemDeErro(erro: unknown): string {
