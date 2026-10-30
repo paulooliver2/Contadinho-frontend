@@ -2,8 +2,8 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ErroApi, mensagemDeErro } from '@/api/erros'
-import AlertaErro from '@/components/AlertaErro.vue'
 import BotaoAcao from '@/components/BotaoAcao.vue'
+import CaixaAviso from '@/components/CaixaAviso.vue'
 import CampoTexto from '@/components/CampoTexto.vue'
 import FormularioEmpilhado from '@/components/FormularioEmpilhado.vue'
 import RegrasSenha from '@/components/RegrasSenha.vue'
@@ -63,7 +63,7 @@ async function criar() {
 
       <RegrasSenha :regras="regras" />
 
-      <AlertaErro :mensagem="erro" />
+      <CaixaAviso :mensagem="erro" />
 
       <BotaoAcao tipo="submit" :desativado="!pronto" :carregando="enviando" texto-carregando="Criando…">
         Criar conta

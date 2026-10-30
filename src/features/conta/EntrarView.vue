@@ -2,8 +2,8 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { mensagemDeErro } from '@/api/erros'
-import AlertaErro from '@/components/AlertaErro.vue'
 import BotaoAcao from '@/components/BotaoAcao.vue'
+import CaixaAviso from '@/components/CaixaAviso.vue'
 import CampoTexto from '@/components/CampoTexto.vue'
 import FormularioEmpilhado from '@/components/FormularioEmpilhado.vue'
 import TelaAcesso from '@/components/TelaAcesso.vue'
@@ -17,6 +17,8 @@ const email = ref('')
 const senha = ref('')
 const erro = ref('')
 const enviando = ref(false)
+/** Volta da tela de senha nova (HU-40). */
+const senhaRedefinida = route.query.senha === 'redefinida'
 
 async function entrar() {
   if (enviando.value || !email.value || !senha.value) return
@@ -41,11 +43,12 @@ async function entrar() {
     :rodape="{ pergunta: 'Ainda não tem conta?', link: 'Criar conta', para: { name: 'criar-conta' } }"
   >
     <FormularioEmpilhado @enviar="entrar">
+      <CaixaAviso v-if="senhaRedefinida" tom="sucesso" mensagem="Senha alterada. Entre com a senha nova." />
       <CampoTexto v-model="email" rotulo="E-mail" tipo="email" autocomplete="email" placeholder="voce@email.com" />
       <CampoTexto v-model="senha" rotulo="Senha" tipo="password" autocomplete="current-password" placeholder="Sua senha" />
       <RouterLink :to="{ name: 'recuperar-senha' }" class="esqueci">Esqueci a senha</RouterLink>
 
-      <AlertaErro :mensagem="erro" />
+      <CaixaAviso :mensagem="erro" />
 
       <BotaoAcao tipo="submit" :desativado="!email || !senha" :carregando="enviando" texto-carregando="Entrando…">
         Entrar

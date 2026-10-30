@@ -13,7 +13,7 @@ const comAbas = computed(() => route.meta.abas === true)
 watch(
   () => sessao.logado,
   (logado) => {
-    if (!logado && !route.meta.publica) router.replace({ name: 'entrar' })
+    if (!logado && !route.meta.acesso) router.replace({ name: 'entrar' })
   },
 )
 </script>
