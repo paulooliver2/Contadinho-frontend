@@ -68,6 +68,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/receber/emprestimos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["registrar_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/pessoas": {
         parameters: {
             query?: never;
@@ -372,6 +388,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/receber/emprestimos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["excluir_2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -437,6 +469,32 @@ export interface components {
             valor: number;
             /** Format: date */
             recebidoEm: string;
+        };
+        EmprestimoPedido: {
+            /** Format: uuid */
+            pessoaId: string;
+            descricao?: string;
+            valor: number;
+            /** Format: int32 */
+            parcelas: number;
+            /** Format: date */
+            primeiraDevolucao?: string;
+        };
+        EmprestimoResposta: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            pessoaId: string;
+            descricao?: string;
+            valor: number;
+            parcelas: components["schemas"]["ParcelaResposta"][];
+        };
+        ParcelaResposta: {
+            /** Format: int32 */
+            numero: number;
+            valor: number;
+            /** Format: date */
+            vencimento?: string;
         };
         NovoCartaoPedido: {
             apelido?: string;
@@ -584,10 +642,26 @@ export interface components {
             fatura: string;
             emAberto: number;
         };
+        EmprestimoHistoricoResposta: {
+            /** Format: uuid */
+            id: string;
+            descricao?: string;
+            valor: number;
+            parcelas: components["schemas"]["ParcelaEmprestimoResposta"][];
+        };
         HistoricoResposta: {
             situacao: components["schemas"]["SituacaoResposta"];
             compras: components["schemas"]["CompraResposta"][];
+            emprestimos: components["schemas"]["EmprestimoHistoricoResposta"][];
             pagamentos: components["schemas"]["PagamentoResposta"][];
+        };
+        ParcelaEmprestimoResposta: {
+            /** Format: int32 */
+            numero: number;
+            valor: number;
+            /** Format: date */
+            vencimento?: string;
+            emAberto: number;
         };
         Conta: {
             /** Format: uuid */
@@ -769,6 +843,30 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PagamentoResposta"];
+                };
+            };
+        };
+    };
+    registrar_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmprestimoPedido"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmprestimoResposta"];
                 };
             };
         };
@@ -1230,6 +1328,26 @@ export interface operations {
         };
     };
     desfazer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    excluir_2: {
         parameters: {
             query?: never;
             header?: never;

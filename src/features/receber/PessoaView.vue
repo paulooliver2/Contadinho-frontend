@@ -12,15 +12,17 @@ import LinhaLancamento from '@/features/cartoes/LinhaLancamento.vue'
 import { mesPorExtenso, reais } from '@/lib/formatos'
 import { formatarWhatsapp } from '@/lib/telefone'
 import { usePessoas } from '@/stores/pessoas'
+import EmprestimoCartao from './EmprestimoCartao.vue'
+import EmprestimoFolha from './EmprestimoFolha.vue'
 import LinhaPagamento from './LinhaPagamento.vue'
 import PagamentoFolha from './PagamentoFolha.vue'
 import PessoaFolha from './PessoaFolha.vue'
-import { buscarHistorico, desfazerPagamento, type CompraAtribuida, type Historico } from './receber'
+import { buscarHistorico, desfazerPagamento, excluirEmprestimo, type CompraAtribuida, type Historico } from './receber'
 import SeloStatus from './SeloStatus.vue'
 
 /**
- * HU-18.3: o saldo da pessoa e o histórico do que ela deve, fatura por fatura, com os pagamentos (HU-19). Daqui
- * também se edita a pessoa.
+ * HU-18.3: o saldo da pessoa e o histórico do que ela deve, fatura por fatura, com os empréstimos (HU-17) e os
+ * pagamentos (HU-19). Daqui também se edita a pessoa.
  */
 const props = defineProps<{ id: string }>()
 
@@ -31,8 +33,10 @@ const erroCarga = ref('')
 const aviso = ref('')
 const folhaAberta = ref(false)
 const pagamentoAberto = ref(false)
-const desfazendo = ref<string | null>(null)
-const erroDesfazer = ref('')
+const emprestimoAberto = ref(false)
+/** O pagamento sendo desfeito ou o empréstimo sendo excluído: um por vez. */
+const ocupado = ref<string | null>(null)
+const erroAcao = ref('')
 
 const pessoa = computed(() => [...pessoas.ativas, ...pessoas.arquivadas].find((p) => p.id === props.id) ?? null)
 
@@ -77,19 +81,28 @@ function seloDa(c: CompraAtribuida): string | undefined {
   return c.emAberto < c.valor ? `falta ${reais(c.emAberto)}` : undefined
 }
 
-async function desfazer(id: string) {
-  if (desfazendo.value) return
-  desfazendo.value = id
-  erroDesfazer.value = ''
+/** Desfazer pagamento ou excluir empréstimo: o saldo é recalculado e o histórico, recarregado. */
+async function executar(id: string, acao: () => Promise<void>, mensagem: string) {
+  if (ocupado.value) return
+  ocupado.value = id
+  erroAcao.value = ''
   try {
-    await desfazerPagamento(id)
-    aviso.value = 'Pagamento desfeito. O saldo foi recalculado.'
+    await acao()
+    aviso.value = mensagem
     await carregar()
   } catch (e) {
-    erroDesfazer.value = mensagemDeErro(e)
+    erroAcao.value = mensagemDeErro(e)
   } finally {
-    desfazendo.value = null
+    ocupado.value = null
   }
+}
+
+function desfazer(id: string) {
+  executar(id, () => desfazerPagamento(id), 'Pagamento desfeito. O saldo foi recalculado.')
+}
+
+function excluir(id: string) {
+  executar(id, () => excluirEmprestimo(id), 'Empréstimo excluído. O saldo foi recalculado.')
 }
 </script>
 
@@ -125,8 +138,22 @@ async function desfazer(id: string) {
 
       <BotaoAcao v-if="historico.situacao.saldo > 0" @click="pagamentoAberto = true">Marcar como pago</BotaoAcao>
       <p v-else-if="historico.situacao.saldo < 0" class="credito">
-        {{ pessoa.apelido ?? pessoa.nome }} tem {{ reais(-historico.situacao.saldo) }} de crédito: ele abate as próximas compras.
+        {{ pessoa.apelido ?? pessoa.nome }} tem {{ reais(-historico.situacao.saldo) }} de crédito: ele abate o que for registrado depois.
       </p>
+      <BotaoAcao v-if="!pessoa.arquivada" variante="secundario" @click="emprestimoAberto = true">Registrar valor emprestado</BotaoAcao>
+
+      <CaixaAviso :mensagem="erroAcao" />
+
+      <section v-if="historico.emprestimos.length > 0" class="grupo" aria-label="Empréstimos">
+        <h2>Empréstimos</h2>
+        <EmprestimoCartao
+          v-for="e in historico.emprestimos"
+          :key="e.id"
+          :emprestimo="e"
+          :excluindo="ocupado === e.id"
+          @excluir="excluir(e.id)"
+        />
+      </section>
 
       <section v-for="g in grupos" :key="g.chave" class="grupo" :aria-label="g.titulo">
         <h2>{{ g.titulo }}</h2>
@@ -137,22 +164,21 @@ async function desfazer(id: string) {
 
       <section v-if="historico.pagamentos.length > 0" class="grupo" aria-label="Pagamentos recebidos">
         <h2>Pagamentos recebidos</h2>
-        <CaixaAviso :mensagem="erroDesfazer" />
         <ul class="lista">
           <LinhaPagamento
             v-for="p in historico.pagamentos"
             :key="p.id"
             :pagamento="p"
-            :desfazendo="desfazendo === p.id"
+            :desfazendo="ocupado === p.id"
             @desfazer="desfazer(p.id)"
           />
         </ul>
       </section>
 
       <EstadoVazio
-        v-if="grupos.length === 0 && historico.pagamentos.length === 0"
+        v-if="grupos.length === 0 && historico.emprestimos.length === 0 && historico.pagamentos.length === 0"
         titulo="Nada registrado ainda"
-        :texto="`Na aba Cartões, toque no responsável de uma compra da fatura e escolha ${pessoa.apelido ?? pessoa.nome}.`"
+        :texto="`Registre um valor emprestado ou, na aba Cartões, toque no responsável de uma compra da fatura e escolha ${pessoa.apelido ?? pessoa.nome}.`"
       >
         <template #icone><IconeCartao :tamanho="28" /></template>
       </EstadoVazio>
@@ -165,6 +191,7 @@ async function desfazer(id: string) {
         :saldo="historico.situacao.saldo"
         @salvo="aoSalvar"
       />
+      <EmprestimoFolha v-model:aberta="emprestimoAberto" :pessoa-id="pessoa.id" @salvo="aoSalvar" />
     </template>
 
     <p v-else class="carregando" role="status">Carregando…</p>

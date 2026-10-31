@@ -25,6 +25,21 @@ export function diaMes(iso: string): string {
   return `${dia}/${mes}`
 }
 
+/** "2026-11-10" vira "10/nov". */
+export function diaMesCurto(iso: string): string {
+  const [, mes, dia] = iso.split('-').map(Number)
+  return `${String(dia).padStart(2, '0')}/${nomesMeses[mes - 1].slice(0, 3)}`
+}
+
+/** O mesmo dia `quantos` meses depois; sem esse dia no mês, o último (31/01 + 1 vira 28/02). */
+export function somarMesesData(iso: string, quantos: number): string {
+  const [ano, mes, dia] = iso.split('-').map(Number)
+  const alvo = somarMeses(`${ano}-${String(mes).padStart(2, '0')}`, quantos)
+  const [anoAlvo, mesAlvo] = alvo.split('-').map(Number)
+  const ultimo = new Date(anoAlvo, mesAlvo, 0).getDate()
+  return `${alvo}-${String(Math.min(dia, ultimo)).padStart(2, '0')}`
+}
+
 /** Hoje no fuso do aparelho, como yyyy-MM-dd. */
 export function hojeIso(): string {
   const agora = new Date()

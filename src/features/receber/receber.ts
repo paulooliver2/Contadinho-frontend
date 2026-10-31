@@ -7,6 +7,8 @@ export type Situacao = components['schemas']['SituacaoResposta']
 export type Historico = components['schemas']['HistoricoResposta']
 export type CompraAtribuida = components['schemas']['CompraResposta']
 export type Pagamento = components['schemas']['PagamentoResposta']
+export type EmprestimoDaPessoa = components['schemas']['EmprestimoHistoricoResposta']
+export type DadosEmprestimo = components['schemas']['EmprestimoPedido']
 
 /** HU-18: total a receber, já recebido e a situação de quem tem algo registrado, pelo vencimento mais próximo. */
 export async function buscarResumo(): Promise<Resumo> {
@@ -15,7 +17,7 @@ export async function buscarResumo(): Promise<Resumo> {
   return data
 }
 
-/** HU-18.3: a situação da pessoa, as compras atribuídas a ela e os pagamentos que ela fez. */
+/** HU-18.3: a situação da pessoa, as compras atribuídas a ela, os empréstimos e os pagamentos que ela fez. */
 export async function buscarHistorico(pessoaId: string): Promise<Historico> {
   const { data, error, response } = await api.GET('/api/receber/pessoas/{pessoaId}', {
     params: { path: { pessoaId } },
@@ -38,6 +40,26 @@ export async function registrarPagamento(pessoaId: string, valor: number, recebi
 export async function desfazerPagamento(id: string) {
   const { error, response } = await api.DELETE('/api/receber/pagamentos/{id}', { params: { path: { id } } })
   if (!response.ok) throw erroDaApi(error, response)
+}
+
+/** HU-17: cada parcela vira um valor a receber; sem `primeiraDevolucao` é "Sem data" (RN-32). */
+export async function registrarEmprestimo(dados: DadosEmprestimo) {
+  const { data, error, response } = await api.POST('/api/receber/emprestimos', { body: dados })
+  if (!data) throw erroDaApi(error, response)
+  return data
+}
+
+/** Apaga o empréstimo e as parcelas; pagamentos já feitos continuam com a pessoa. */
+export async function excluirEmprestimo(id: string) {
+  const { error, response } = await api.DELETE('/api/receber/emprestimos/{id}', { params: { path: { id } } })
+  if (!response.ok) throw erroDaApi(error, response)
+}
+
+/** RN-31 e RN-40, como o servidor divide: parcelas iguais e os centavos que sobram na última. */
+export function dividirEmParcelas(valor: number, parcelas: number): { cada: number; ultima: number } {
+  const centavos = Math.round(valor * 100)
+  const cada = Math.floor(centavos / parcelas)
+  return { cada: cada / 100, ultima: (centavos - cada * (parcelas - 1)) / 100 }
 }
 
 /** RN-29, como se lê na tela. */

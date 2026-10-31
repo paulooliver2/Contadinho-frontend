@@ -10,18 +10,20 @@ import EstadoVazio from '@/components/EstadoVazio.vue'
 import IconePessoas from '@/components/IconePessoas.vue'
 import { reais } from '@/lib/formatos'
 import { usePessoas, type Pessoa } from '@/stores/pessoas'
+import EmprestimoFolha from './EmprestimoFolha.vue'
 import LinhaPessoa from './LinhaPessoa.vue'
 import PessoaFolha from './PessoaFolha.vue'
 import { buscarResumo, type Resumo, type Situacao } from './receber'
 
 /**
  * A receber (HU-18): quanto falta receber, quanto já foi recebido e as pessoas, de quem vence primeiro para quem
- * não deve nada. Tocar numa pessoa abre o histórico dela; o cadastro é o da HU-16.
+ * não deve nada. Tocar numa pessoa abre o histórico dela; o cadastro é o da HU-16 e o empréstimo, o da HU-17.
  */
 const router = useRouter()
 const pessoas = usePessoas()
 const resumo = ref<Resumo | null>(null)
 const folhaAberta = ref(false)
+const emprestimoAberto = ref(false)
 const verArquivadas = ref(false)
 const aviso = ref('')
 const erroCarga = ref('')
@@ -61,6 +63,11 @@ function abrir(p: Pessoa) {
 function aoSalvar(mensagem: string) {
   aviso.value = mensagem
 }
+
+function aoRegistrar(mensagem: string) {
+  aviso.value = mensagem
+  carregar()
+}
 </script>
 
 <template>
@@ -77,6 +84,8 @@ function aoSalvar(mensagem: string) {
         <p class="recebido">Já recebido: {{ reais(resumo.recebido) }}</p>
       </CartaoResumo>
 
+      <BotaoAcao @click="emprestimoAberto = true">Registrar valor emprestado</BotaoAcao>
+
       <CaixaAviso v-if="aviso" tom="sucesso" fechavel :mensagem="aviso" @fechar="aviso = ''" />
 
       <EstadoVazio
@@ -92,7 +101,7 @@ function aoSalvar(mensagem: string) {
         <ul class="lista" aria-label="Pessoas">
           <LinhaPessoa v-for="p in ativas" :key="p.id" :pessoa="p" :situacao="situacao(p)" @abrir="abrir(p)" />
         </ul>
-        <BotaoAcao @click="folhaAberta = true">Adicionar pessoa</BotaoAcao>
+        <BotaoAcao variante="secundario" @click="folhaAberta = true">Adicionar pessoa</BotaoAcao>
       </template>
 
       <template v-if="pessoas.arquivadas.length > 0">
@@ -108,6 +117,7 @@ function aoSalvar(mensagem: string) {
     <p v-else class="carregando" role="status">Carregando…</p>
 
     <PessoaFolha v-model:aberta="folhaAberta" :editando="null" @salvo="aoSalvar" />
+    <EmprestimoFolha v-model:aberta="emprestimoAberto" @salvo="aoRegistrar" />
   </div>
 </template>
 
