@@ -1,10 +1,16 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { diaMes, hojeIso, reais } from '@/lib/formatos'
 import { formatarWhatsapp } from '@/lib/telefone'
 import type { Pessoa } from '@/stores/pessoas'
+import type { Situacao } from './receber'
+import SeloStatus from './SeloStatus.vue'
 
-/** Uma pessoa na lista de A receber: iniciais, nome, apelido e WhatsApp. Tocar abre a edição. */
-const props = defineProps<{ pessoa: Pessoa }>()
+/**
+ * Uma pessoa na lista de A receber: iniciais, nome e, com `situacao`, o saldo, o status e o vencimento mais
+ * próximo (HU-18). Sem nada registrado, mostra apelido e WhatsApp. Tocar abre o histórico.
+ */
+const props = defineProps<{ pessoa: Pessoa; situacao?: Situacao }>()
 const emit = defineEmits<{ abrir: [] }>()
 
 const iniciais = computed(() => {
@@ -15,6 +21,14 @@ const iniciais = computed(() => {
 
 const detalhes = computed(() => {
   const p = props.pessoa
+  const s = props.situacao
+  if (s && s.saldo > 0) {
+    const partes = [`de ${reais(s.original)}`]
+    if (s.proximoVencimento) {
+      partes.push(`${s.proximoVencimento < hojeIso() ? 'venceu' : 'vence'} ${diaMes(s.proximoVencimento)}`)
+    }
+    return partes.join(' · ')
+  }
   const partes: string[] = []
   if (p.apelido) partes.push(p.apelido)
   partes.push(p.whatsapp ? formatarWhatsapp(p.whatsapp) : 'sem WhatsApp')
@@ -24,11 +38,15 @@ const detalhes = computed(() => {
 
 <template>
   <li>
-    <button type="button" class="linha" :class="{ arquivada: pessoa.arquivada }" :aria-label="`Editar ${pessoa.nome}`" @click="emit('abrir')">
+    <button type="button" class="linha" :class="{ arquivada: pessoa.arquivada }" :aria-label="`Ver ${pessoa.nome}`" @click="emit('abrir')">
       <span class="iniciais" aria-hidden="true">{{ iniciais }}</span>
       <span class="textos">
         <span class="nome">{{ pessoa.nome }}</span>
         <span class="detalhes">{{ detalhes }}</span>
+      </span>
+      <span v-if="situacao" class="saldo">
+        <span class="valor">{{ reais(situacao.saldo) }}</span>
+        <SeloStatus :status="situacao.status" />
       </span>
     </button>
   </li>
@@ -95,5 +113,19 @@ li + li {
 .detalhes {
   font-size: 12px;
   color: var(--texto-suave);
+}
+
+.saldo {
+  margin-left: auto;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.valor {
+  font-family: var(--fonte-numeros);
+  font-size: 14px;
 }
 </style>

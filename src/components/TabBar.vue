@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useRoute } from 'vue-router'
+
 // Abas do MVP. "Investir" entra no R2.
 const abas = [
   { nome: 'inicio', rotulo: 'Início', icone: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z' },
@@ -6,11 +8,19 @@ const abas = [
   { nome: 'cartoes', rotulo: 'Cartões', icone: 'M4.5 5h15a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-15a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zM2.5 10h19' },
   { nome: 'receber', rotulo: 'A receber', icone: 'M4 8h15l-3-3M20 16H5l3 3' },
 ] as const
+
+const rota = useRoute()
 </script>
 
 <template>
   <nav class="abas" aria-label="Navegação principal">
-    <RouterLink v-for="aba in abas" :key="aba.nome" :to="{ name: aba.nome }" class="aba" exact-active-class="ativa">
+    <RouterLink
+      v-for="aba in abas"
+      :key="aba.nome"
+      :to="{ name: aba.nome }"
+      class="aba"
+      :class="{ ativa: rota.name === aba.nome || rota.meta.aba === aba.nome }"
+    >
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path :d="aba.icone" />

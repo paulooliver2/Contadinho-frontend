@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { mensagemDeErro } from '@/api/erros'
 import BotaoAcao from '@/components/BotaoAcao.vue'
 import CaixaAviso from '@/components/CaixaAviso.vue'
+import CartaoResumo from '@/components/CartaoResumo.vue'
 import EstadoVazio from '@/components/EstadoVazio.vue'
 import IconeCartao from '@/components/IconeCartao.vue'
 import NavegadorMes from '@/components/NavegadorMes.vue'
@@ -142,12 +143,10 @@ async function aoSalvar(mensagem: string) {
   </template>
 
   <template v-else-if="fatura && fatura.mes === mes">
-    <section class="resumo" aria-label="Resumo da fatura" :aria-busy="carregando || undefined">
-      <p class="rotulo">Total da fatura</p>
-      <p class="total">{{ reais(fatura.total) }}</p>
+    <CartaoResumo rotulo="Total da fatura" :valor="reais(fatura.total)" nome="Resumo da fatura" :ocupado="carregando">
       <p class="datas">Fecha {{ diaMes(fatura.fechamento) }} · vence {{ diaMes(fatura.vencimento) }}</p>
       <DivisaoFatura v-if="dividida && pessoas.carregado" v-model:filtro="filtro" :partes="fatura.partes" />
-    </section>
+    </CartaoResumo>
 
     <div class="opcoes">
       <BotaoAcao variante="secundario" @click="seletorArquivo?.click()">Importar arquivo</BotaoAcao>
@@ -192,30 +191,9 @@ async function aoSalvar(mensagem: string) {
 </template>
 
 <style scoped>
-.resumo {
-  padding: 16px;
-  border-radius: var(--raio-card);
-  background: var(--escuro);
-  color: var(--fundo);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.resumo p {
-  margin: 0;
-}
-
-.rotulo,
 .datas {
   font-size: 12px;
   color: var(--escuro-texto-suave);
-}
-
-.total {
-  font-family: var(--fonte-numeros);
-  font-size: 28px;
-  font-weight: 600;
 }
 
 .opcoes {

@@ -260,6 +260,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/receber": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["resumo"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/receber/pessoas/{pessoaId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["historico"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/conta": {
         parameters: {
             query?: never;
@@ -476,6 +508,40 @@ export interface components {
             /** Format: email */
             email: string;
             senha: string;
+        };
+        ResumoResposta: {
+            aReceber: number;
+            recebido: number;
+            pessoas: components["schemas"]["SituacaoResposta"][];
+        };
+        SituacaoResposta: {
+            /** Format: uuid */
+            pessoaId: string;
+            saldo: number;
+            original: number;
+            recebido: number;
+            /** @enum {string} */
+            status: "PENDENTE" | "PAGOU_PARTE" | "PAGO";
+            /** Format: date */
+            proximoVencimento?: string;
+        };
+        CompraResposta: {
+            /** Format: uuid */
+            lancamentoId: string;
+            /** Format: date */
+            data: string;
+            descricao: string;
+            valor: number;
+            /** Format: int32 */
+            parcelaAtual?: number;
+            /** Format: int32 */
+            parcelaTotal?: number;
+            cartao: string;
+            fatura: string;
+        };
+        HistoricoResposta: {
+            situacao: components["schemas"]["SituacaoResposta"];
+            compras: components["schemas"]["CompraResposta"][];
         };
         Conta: {
             /** Format: uuid */
@@ -982,6 +1048,48 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Tokens"];
+                };
+            };
+        };
+    };
+    resumo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResumoResposta"];
+                };
+            };
+        };
+    };
+    historico: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pessoaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HistoricoResposta"];
                 };
             };
         };
