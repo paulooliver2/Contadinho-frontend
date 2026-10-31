@@ -12,11 +12,16 @@ import LinhaLancamento from '@/features/cartoes/LinhaLancamento.vue'
 import { mesPorExtenso, reais } from '@/lib/formatos'
 import { formatarWhatsapp } from '@/lib/telefone'
 import { usePessoas } from '@/stores/pessoas'
+import LinhaPagamento from './LinhaPagamento.vue'
+import PagamentoFolha from './PagamentoFolha.vue'
 import PessoaFolha from './PessoaFolha.vue'
-import { buscarHistorico, type CompraAtribuida, type Historico } from './receber'
+import { buscarHistorico, desfazerPagamento, type CompraAtribuida, type Historico } from './receber'
 import SeloStatus from './SeloStatus.vue'
 
-/** HU-18.3: o saldo da pessoa e o histórico do que ela deve, fatura por fatura. Daqui também se edita a pessoa. */
+/**
+ * HU-18.3: o saldo da pessoa e o histórico do que ela deve, fatura por fatura, com os pagamentos (HU-19). Daqui
+ * também se edita a pessoa.
+ */
 const props = defineProps<{ id: string }>()
 
 const router = useRouter()
@@ -25,6 +30,9 @@ const historico = ref<Historico | null>(null)
 const erroCarga = ref('')
 const aviso = ref('')
 const folhaAberta = ref(false)
+const pagamentoAberto = ref(false)
+const desfazendo = ref<string | null>(null)
+const erroDesfazer = ref('')
 
 const pessoa = computed(() => [...pessoas.ativas, ...pessoas.arquivadas].find((p) => p.id === props.id) ?? null)
 
@@ -61,6 +69,28 @@ function aoSalvar(mensagem: string) {
   aviso.value = mensagem
   carregar()
 }
+
+/** RN-30: a compra já quitada pelos pagamentos fica "paga"; a quitada em parte mostra o que falta. */
+function seloDa(c: CompraAtribuida): string | undefined {
+  if (c.valor <= 0) return undefined
+  if (c.emAberto === 0) return 'paga'
+  return c.emAberto < c.valor ? `falta ${reais(c.emAberto)}` : undefined
+}
+
+async function desfazer(id: string) {
+  if (desfazendo.value) return
+  desfazendo.value = id
+  erroDesfazer.value = ''
+  try {
+    await desfazerPagamento(id)
+    aviso.value = 'Pagamento desfeito. O saldo foi recalculado.'
+    await carregar()
+  } catch (e) {
+    erroDesfazer.value = mensagemDeErro(e)
+  } finally {
+    desfazendo.value = null
+  }
+}
 </script>
 
 <template>
@@ -93,15 +123,34 @@ function aoSalvar(mensagem: string) {
         </p>
       </CartaoResumo>
 
+      <BotaoAcao v-if="historico.situacao.saldo > 0" @click="pagamentoAberto = true">Marcar como pago</BotaoAcao>
+      <p v-else-if="historico.situacao.saldo < 0" class="credito">
+        {{ pessoa.apelido ?? pessoa.nome }} tem {{ reais(-historico.situacao.saldo) }} de crédito: ele abate as próximas compras.
+      </p>
+
       <section v-for="g in grupos" :key="g.chave" class="grupo" :aria-label="g.titulo">
         <h2>{{ g.titulo }}</h2>
         <ul class="lista">
-          <LinhaLancamento v-for="c in g.compras" :key="c.lancamentoId" :item="c" />
+          <LinhaLancamento v-for="c in g.compras" :key="c.lancamentoId" :item="c" :selo="seloDa(c)" />
+        </ul>
+      </section>
+
+      <section v-if="historico.pagamentos.length > 0" class="grupo" aria-label="Pagamentos recebidos">
+        <h2>Pagamentos recebidos</h2>
+        <CaixaAviso :mensagem="erroDesfazer" />
+        <ul class="lista">
+          <LinhaPagamento
+            v-for="p in historico.pagamentos"
+            :key="p.id"
+            :pagamento="p"
+            :desfazendo="desfazendo === p.id"
+            @desfazer="desfazer(p.id)"
+          />
         </ul>
       </section>
 
       <EstadoVazio
-        v-if="grupos.length === 0"
+        v-if="grupos.length === 0 && historico.pagamentos.length === 0"
         titulo="Nada registrado ainda"
         :texto="`Na aba Cartões, toque no responsável de uma compra da fatura e escolha ${pessoa.apelido ?? pessoa.nome}.`"
       >
@@ -109,6 +158,13 @@ function aoSalvar(mensagem: string) {
       </EstadoVazio>
 
       <PessoaFolha v-model:aberta="folhaAberta" :editando="pessoa" @salvo="aoSalvar" />
+      <PagamentoFolha
+        v-model:aberta="pagamentoAberto"
+        :pessoa-id="pessoa.id"
+        :nome="pessoa.apelido ?? pessoa.nome"
+        :saldo="historico.situacao.saldo"
+        @salvo="aoSalvar"
+      />
     </template>
 
     <p v-else class="carregando" role="status">Carregando…</p>
@@ -181,6 +237,12 @@ h2 {
   border-radius: var(--raio-card);
   background: var(--superficie);
   overflow: hidden;
+}
+
+.credito {
+  margin: 0;
+  font-size: 13px;
+  color: var(--texto-suave);
 }
 
 .carregando {

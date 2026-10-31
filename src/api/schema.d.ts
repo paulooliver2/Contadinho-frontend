@@ -52,6 +52,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/receber/pessoas/{pessoaId}/pagamentos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["registrar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/pessoas": {
         parameters: {
             query?: never;
@@ -340,6 +356,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/receber/pagamentos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["desfazer"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -393,6 +425,18 @@ export interface components {
             lancamento: components["schemas"]["LancamentoResposta"];
             /** Format: int32 */
             proximas: number;
+        };
+        PagamentoPedido: {
+            valor: number;
+            /** Format: date */
+            recebidoEm?: string;
+        };
+        PagamentoResposta: {
+            /** Format: uuid */
+            id: string;
+            valor: number;
+            /** Format: date */
+            recebidoEm: string;
         };
         NovoCartaoPedido: {
             apelido?: string;
@@ -538,10 +582,12 @@ export interface components {
             parcelaTotal?: number;
             cartao: string;
             fatura: string;
+            emAberto: number;
         };
         HistoricoResposta: {
             situacao: components["schemas"]["SituacaoResposta"];
             compras: components["schemas"]["CompraResposta"][];
+            pagamentos: components["schemas"]["PagamentoResposta"][];
         };
         Conta: {
             /** Format: uuid */
@@ -697,6 +743,32 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AtribuicaoResposta"];
+                };
+            };
+        };
+    };
+    registrar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pessoaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PagamentoPedido"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PagamentoResposta"];
                 };
             };
         };
@@ -1154,6 +1226,26 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["BancoResposta"][];
                 };
+            };
+        };
+    };
+    desfazer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
