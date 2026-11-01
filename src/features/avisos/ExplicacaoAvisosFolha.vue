@@ -32,7 +32,8 @@ async function permitir() {
   <FolhaInferior v-model:aberta="aberta" titulo="Avisar antes de vencer?">
     <p class="texto">
       O Contadinho te avisa <strong>2 dias antes</strong> e <strong>no dia</strong> do vencimento de cada conta fixa, às 9h,
-      para você não pagar juros. Tocar no aviso abre a conta para marcar como paga.
+      para você não pagar juros. E, em cada cartão, quando a fatura fecha e, 3 dias antes de vencer, quem ainda deve
+      a parte dela.
     </p>
     <p class="texto suave">Os avisos ficam agendados no seu celular. Em seguida, ele vai pedir a sua permissão.</p>
     <BotaoAcao :carregando="pedindo" texto-carregando="Pedindo…" @click="permitir">Permitir avisos</BotaoAcao>

@@ -53,7 +53,7 @@ const proximos = computed(() =>
     <section class="cartao" aria-labelledby="titulo-estado">
       <template v-if="avisos.permissao === 'concedida'">
         <h2 id="titulo-estado">Avisos ligados</h2>
-        <p class="texto">O Contadinho avisa 2 dias antes e no dia do vencimento de cada conta fixa, às 9h.</p>
+        <p class="texto">O Contadinho avisa 2 dias antes e no dia do vencimento de cada conta fixa, às 9h, quando cada fatura fecha e, 3 dias antes de ela vencer, se alguém ainda deve a parte dela.</p>
       </template>
       <template v-else-if="avisos.permissao === 'negada'">
         <h2 id="titulo-estado">Avisos bloqueados no celular</h2>
@@ -71,7 +71,7 @@ const proximos = computed(() =>
       </template>
       <template v-else-if="avisos.permissao === 'perguntar'">
         <h2 id="titulo-estado">Avisos desligados</h2>
-        <p class="texto">Ligue para ser avisado 2 dias antes e no dia do vencimento de cada conta fixa, às 9h.</p>
+        <p class="texto">Ligue para ser avisado 2 dias antes e no dia do vencimento de cada conta fixa, às 9h, quando cada fatura fecha e, 3 dias antes de ela vencer, se alguém ainda deve a parte dela.</p>
         <BotaoAcao :carregando="pedindo" texto-carregando="Pedindo…" @click="permitir">Ativar avisos</BotaoAcao>
       </template>
       <p v-else class="texto" role="status">Carregando…</p>

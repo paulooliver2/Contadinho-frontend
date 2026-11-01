@@ -57,7 +57,8 @@ export const useAvisos = defineStore('avisos', () => {
             titulo: a.titulo,
             texto: a.texto,
             quando: a.quando,
-            extra: { ocorrenciaId: a.ocorrenciaId, mes: a.mes },
+            acao: a.acao,
+            extra: { tela: a.destino.tela, id: a.destino.id ?? '', mes: a.destino.mes ?? '' },
           })),
         )
       } while (deNovo)

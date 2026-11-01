@@ -40,8 +40,9 @@ onMounted(carregar)
 const avisos = useAvisos()
 
 function aoCadastrar(cartao: Cartao) {
-  // HU-25.1: o primeiro cartão também é hora de explicar os avisos.
+  // HU-25.1: o primeiro cartão também é hora de explicar os avisos; o cartão novo já entra na agenda (HU-27).
   avisos.oferecer()
+  avisos.atualizar()
   selecionadoId.value = cartao.id
   aviso.value = `${cartao.apelido} •• ${cartao.ultimos4} cadastrado.`
 }

@@ -14,6 +14,8 @@ export interface Notificacao {
   texto: string
   /** Horário local, sem fuso, como 2026-11-03T09:00:00. */
   quando: string
+  /** O botão do aviso, como "Cobrar"; tocar no aviso ou no botão abre o mesmo destino. */
+  acao?: string
   /** O que abrir ao tocar. */
   extra: Record<string, string>
 }
@@ -46,20 +48,38 @@ function id(chave: string): number {
   return h & 0x7fffffff
 }
 
+/** Os botões que o sistema mostra nos avisos, um tipo por texto ("Cobrar"). */
+const acoes = new Map<string, string>()
+
+async function tipoDaAcao(acao: string): Promise<string> {
+  let tipo = acoes.get(acao)
+  if (!tipo) {
+    tipo = `ACAO_${acoes.size + 1}`
+    acoes.set(acao, tipo)
+    await LocalNotifications.registerActionTypes({
+      types: [...acoes].map(([titulo, id]) => ({ id, actions: [{ id, title: titulo }] })),
+    })
+  }
+  return tipo
+}
+
 /** Troca tudo o que está agendado por esta lista (HU-29). */
 export async function reagendar(lista: Notificacao[]): Promise<void> {
   if (!nativo()) return
   await cancelarTodas()
   if (lista.length === 0) return
-  await LocalNotifications.schedule({
-    notifications: lista.map((n) => ({
+  const notifications = []
+  for (const n of lista) {
+    notifications.push({
       id: id(n.chave),
       title: n.titulo,
       body: n.texto,
       schedule: { at: new Date(n.quando), allowWhileIdle: true },
+      actionTypeId: n.acao ? await tipoDaAcao(n.acao) : undefined,
       extra: n.extra,
-    })),
-  })
+    })
+  }
+  await LocalNotifications.schedule({ notifications })
 }
 
 export async function cancelarTodas(): Promise<void> {
@@ -68,7 +88,7 @@ export async function cancelarTodas(): Promise<void> {
   if (notifications.length) await LocalNotifications.cancel({ notifications: notifications.map((n) => ({ id: n.id })) })
 }
 
-/** HU-26.3: tocar no aviso abre a tela dele. */
+/** HU-26.3 e HU-27.2: tocar no aviso, ou no botão dele, abre a tela dele. */
 export function aoTocar(acao: (extra: Record<string, string>) => void) {
   if (!nativo()) return
   LocalNotifications.addListener('localNotificationActionPerformed', (evento) => acao(evento.notification.extra ?? {}))

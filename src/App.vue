@@ -14,9 +14,12 @@ const comAbas = computed(() => route.meta.abas === true)
 // Cria o store já na abertura: é ele que reagenda os avisos quando a sessão começa (HU-29.2).
 useAvisos()
 
-// HU-26.3: o aviso de conta abre a conta do mês, com "Marcar como paga".
-aoTocar(({ ocorrenciaId, mes }) => {
-  if (ocorrenciaId && mes) router.push({ name: 'gastos', query: { conta: ocorrenciaId, mes } })
+// O aviso abre o que pede ação: a conta com "Marcar como paga" (HU-26.3), a fatura para importar ou quem cobrar (HU-27).
+aoTocar(({ tela, id, mes }) => {
+  if (tela === 'CONTA' && id && mes) router.push({ name: 'gastos', query: { conta: id, mes } })
+  else if (tela === 'FATURA' && id && mes) router.push({ name: 'cartoes', query: { cartao: id, fatura: mes } })
+  else if (tela === 'PESSOA' && id) router.push({ name: 'pessoa', params: { id } })
+  else if (tela === 'RECEBER') router.push({ name: 'receber' })
 })
 
 // Sessão encerrada no meio do uso (refresh vencido ou revogado): volta para o login (HU-01.4).

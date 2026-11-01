@@ -11,6 +11,7 @@ import IconeCartao from '@/components/IconeCartao.vue'
 import LinhaLancamento from '@/features/cartoes/LinhaLancamento.vue'
 import { cobradoHa, mesPorExtenso, reais } from '@/lib/formatos'
 import { formatarWhatsapp } from '@/lib/telefone'
+import { useAvisos } from '@/stores/avisos'
 import { usePessoas } from '@/stores/pessoas'
 import CobrancaFolha from './CobrancaFolha.vue'
 import EmprestimoCartao from './EmprestimoCartao.vue'
@@ -29,6 +30,7 @@ const props = defineProps<{ id: string }>()
 
 const router = useRouter()
 const pessoas = usePessoas()
+const avisos = useAvisos()
 const historico = ref<Historico | null>(null)
 const erroCarga = ref('')
 const aviso = ref('')
@@ -73,9 +75,11 @@ watch(pessoa, (atual, anterior) => {
   if (anterior && !atual) router.replace({ name: 'receber' })
 })
 
+/** Pagamento, empréstimo ou nome novo: o "Faltam R$ X de [pessoas]" da fatura muda junto (HU-27, HU-29.1). */
 function aoSalvar(mensagem: string) {
   aviso.value = mensagem
   carregar()
+  avisos.atualizar()
 }
 
 function cobrar() {
@@ -118,6 +122,7 @@ async function executar(id: string, acao: () => Promise<void>, mensagem: string)
   try {
     await acao()
     aviso.value = mensagem
+    avisos.atualizar()
     await carregar()
   } catch (e) {
     erroAcao.value = mensagemDeErro(e)

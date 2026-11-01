@@ -9,6 +9,7 @@ import IconeCartao from '@/components/IconeCartao.vue'
 import NavegadorMes from '@/components/NavegadorMes.vue'
 import TextoAjuda from '@/components/TextoAjuda.vue'
 import { diaMes, reais } from '@/lib/formatos'
+import { useAvisos } from '@/stores/avisos'
 import type { Cartao } from '@/stores/cartoes'
 import { usePessoas } from '@/stores/pessoas'
 import CompraFolha from './CompraFolha.vue'
@@ -27,6 +28,7 @@ import ResponsavelFolha from './ResponsavelFolha.vue'
 const props = defineProps<{ cartao: Cartao; mesInicial?: string }>()
 
 const mes = ref(props.mesInicial ?? props.cartao.faturaAberta)
+const avisos = useAvisos()
 const fatura = ref<Fatura | null>(null)
 const carregando = ref(false)
 const erroCarga = ref('')
@@ -117,6 +119,7 @@ function aoImportar(r: Importacao) {
   if (r.casadas > 0) partes.push(`${r.casadas} ${r.casadas === 1 ? 'digitada confirmada' : 'digitadas confirmadas'}`)
   partes.push(`${r.jaExistiam} já ${r.jaExistiam === 1 ? 'existia' : 'existiam'}`)
   const mensagem = `Fatura importada: ${partes.join(', ')}.`
+  avisos.atualizar()
   if (mes.value === r.mes) {
     aviso.value = mensagem
     carregar()
@@ -126,8 +129,10 @@ function aoImportar(r: Importacao) {
   }
 }
 
+/** Compra adicionada, corrigida, excluída ou atribuída: o "Faltam R$ X" da fatura muda junto (HU-27, HU-29.1). */
 async function aoSalvar(mensagem: string) {
   aviso.value = mensagem
+  avisos.atualizar()
   await carregar()
   // Quem ficou sem compras some da divisão; o filtro dele não mostraria nada.
   const aindaExiste = fatura.value?.partes.some((p) => (p.pessoaId ?? 'DONO') === filtro.value)

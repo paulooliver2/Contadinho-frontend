@@ -1281,14 +1281,20 @@ export interface components {
         AvisoResposta: {
             chave: string;
             /** @enum {string} */
-            tipo: "CONTA_ANTES" | "CONTA_NO_DIA";
+            tipo: "CONTA_ANTES" | "CONTA_NO_DIA" | "FATURA_FECHOU" | "FATURA_A_RECEBER";
             /** Format: date-time */
             quando: string;
             titulo: string;
             texto: string;
+            acao?: string;
+            destino: components["schemas"]["DestinoResposta"];
+        };
+        DestinoResposta: {
+            /** @enum {string} */
+            tela: "CONTA" | "FATURA" | "PESSOA" | "RECEBER";
             /** Format: uuid */
-            ocorrenciaId: string;
-            mes: string;
+            id?: string;
+            mes?: string;
         };
     };
     responses: never;

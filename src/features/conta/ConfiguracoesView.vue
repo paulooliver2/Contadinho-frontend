@@ -101,7 +101,7 @@ async function sair() {
 
       <h2>Avisos</h2>
       <CartaoAtalho titulo="Avisos" :detalhe="estadoAvisos" :para="{ name: 'avisos' }">
-        <span class="ajuda">Vencimento das contas fixas, 2 dias antes e no dia.</span>
+        <span class="ajuda">Vencimento das contas fixas, fechamento das faturas e quem ainda deve.</span>
       </CartaoAtalho>
 
       <BotaoAcao variante="secundario" @click="sair">Sair</BotaoAcao>
