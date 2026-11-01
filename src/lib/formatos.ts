@@ -51,6 +51,15 @@ export function cobradoHa(instante: string): string {
   return `cobrado há ${dias} dias`
 }
 
+/** Quantos dias de `de` até `ate`, as duas em yyyy-MM-dd; negativo se `ate` vem antes. */
+export function diasEntre(de: string, ate: string): number {
+  const dia = (iso: string) => {
+    const [ano, mes, d] = iso.split('-').map(Number)
+    return Date.UTC(ano, mes - 1, d)
+  }
+  return Math.round((dia(ate) - dia(de)) / 86_400_000)
+}
+
 /** Hoje no fuso do aparelho, como yyyy-MM-dd. */
 export function hojeIso(): string {
   const agora = new Date()
