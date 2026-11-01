@@ -11,12 +11,14 @@ import TextoAjuda from '@/components/TextoAjuda.vue'
 import { useErrosDeCampos } from '@/lib/errosDeCampos'
 import { diaMes, hojeIso, lerValor, mesPorExtenso, reais, valorParaCampo } from '@/lib/formatos'
 import { desfazerPagamentoConta, FORMAS, pagarConta, type ContaDoMes } from './gastos'
+import LigacaoFatura from './LigacaoFatura.vue'
 
 /**
  * HU-13: a conta fixa num mês. Marca como paga (data e valor pagos, que podem diferir do previsto, RN-25) ou desfaz.
- * Conta no cartão é paga pela fatura. Daqui também se abre o cadastro da conta fixa (HU-11.3).
+ * Conta no cartão é paga pela fatura e se liga à compra dela (HU-14). Daqui também se abre o cadastro da conta fixa
+ * (HU-11.3).
  */
-const props = defineProps<{ item: ContaDoMes | null; categoria: string }>()
+const props = defineProps<{ item: ContaDoMes | null; categoria: string; cartao?: string }>()
 const aberta = defineModel<boolean>('aberta', { required: true })
 const emit = defineEmits<{ salvo: [mensagem: string]; editar: [] }>()
 
@@ -52,7 +54,10 @@ const situacao = computed(() => {
 const cadastro = computed(() => {
   const i = props.item
   if (!i) return ''
-  const forma = FORMAS.find((f) => f.valor === i.conta.formaPagamento)?.rotulo
+  const forma =
+    i.conta.formaPagamento === 'CARTAO' && props.cartao
+      ? `Cartão ${props.cartao}`
+      : FORMAS.find((f) => f.valor === i.conta.formaPagamento)?.rotulo
   return [`Todo dia ${i.conta.diaVencimento}`, forma, reais(i.valorAtual), props.categoria].join(' · ')
 })
 
@@ -92,6 +97,12 @@ function pagar() {
   })
 }
 
+/** HU-14: ligou ou desligou da fatura. */
+function ligou(mensagem: string) {
+  emit('salvo', mensagem)
+  aberta.value = false
+}
+
 function desfazer() {
   const i = props.item
   if (!i) return
@@ -113,12 +124,7 @@ function desfazer() {
       </section>
 
       <FormularioEmpilhado @enviar="pagar">
-        <template v-if="noCartao">
-          <p class="destaque">
-            <span>Valor de {{ mes }}</span><span class="numero">{{ reais(item.valor) }}</span>
-          </p>
-          <TextoAjuda>Conta no cartão é paga pela fatura: ela entra no mês quando a fatura chega.</TextoAjuda>
-        </template>
+        <LigacaoFatura v-if="noCartao" :item="item" :cartao="cartao" @salvo="ligou" />
 
         <template v-else-if="item.status === 'PAGA'">
           <p class="destaque">

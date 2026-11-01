@@ -55,6 +55,36 @@ export async function desfazerPagamentoConta(id: string): Promise<ContaDoMes> {
   return data
 }
 
+export type CompraDaFatura = components['schemas']['CompraDaFatura']
+
+/** HU-14.2: compras do cartão da conta perto do vencimento que ainda não pagam outra conta. */
+export async function buscarCandidatas(id: string): Promise<CompraDaFatura[]> {
+  const { data, error, response } = await api.GET('/api/contas-fixas/ocorrencias/{id}/candidatas', {
+    params: { path: { id } },
+  })
+  if (!data) throw erroDaApi(error, response)
+  return data
+}
+
+/** HU-14.2: liga a conta do mês a uma compra da fatura; passa a "na fatura". */
+export async function ligarAFatura(id: string, lancamentoId: string): Promise<ContaDoMes> {
+  const { data, error, response } = await api.PUT('/api/contas-fixas/ocorrencias/{id}/lancamento', {
+    params: { path: { id } },
+    body: { lancamentoId },
+  })
+  if (!data) throw erroDaApi(error, response)
+  return data
+}
+
+/** HU-14.2: volta a aguardar a fatura. */
+export async function desligarDaFatura(id: string): Promise<ContaDoMes> {
+  const { data, error, response } = await api.DELETE('/api/contas-fixas/ocorrencias/{id}/lancamento', {
+    params: { path: { id } },
+  })
+  if (!data) throw erroDaApi(error, response)
+  return data
+}
+
 /** HU-11.1, como se lê na tela. */
 export const FORMAS: readonly { valor: FormaPagamento; rotulo: string }[] = [
   { valor: 'PIX_BOLETO', rotulo: 'Pix ou boleto' },

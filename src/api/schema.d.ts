@@ -68,6 +68,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/contas-fixas/ocorrencias/{id}/lancamento": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["ligar"];
+        post?: never;
+        delete: operations["desligar"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/conta/pix": {
         parameters: {
             query?: never;
@@ -420,6 +436,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/contas-fixas/ocorrencias/{id}/candidatas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["candidatas"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/contas-fixas/mes/{mes}": {
         parameters: {
             query?: never;
@@ -615,6 +647,40 @@ export interface components {
             /** Format: date */
             encerradaEm?: string;
         };
+        LigacaoPedido: {
+            /** Format: uuid */
+            lancamentoId: string;
+        };
+        CompraDaFatura: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            data: string;
+            descricao: string;
+            valor: number;
+            /** Format: int32 */
+            parcelaAtual?: number;
+            /** Format: int32 */
+            parcelaTotal?: number;
+            cartao: string;
+            fatura: string;
+        };
+        OcorrenciaResposta: {
+            /** Format: uuid */
+            id: string;
+            conta: components["schemas"]["ContaFixaResposta"];
+            valorAtual: number;
+            /** Format: date */
+            vencimento: string;
+            valor: number;
+            valorPrevisto: number;
+            valorPago?: number;
+            /** Format: date */
+            pagoEm?: string;
+            compra?: components["schemas"]["CompraDaFatura"];
+            /** @enum {string} */
+            status: "A_PAGAR" | "PAGA" | "AGUARDANDO_FATURA" | "NA_FATURA";
+        };
         PixPedido: {
             /** @enum {string} */
             tipo: "CPF" | "EMAIL" | "CELULAR" | "ALEATORIA";
@@ -672,21 +738,6 @@ export interface components {
             /** Format: date */
             pagoEm?: string;
             valorPago?: number;
-        };
-        OcorrenciaResposta: {
-            /** Format: uuid */
-            id: string;
-            conta: components["schemas"]["ContaFixaResposta"];
-            valorAtual: number;
-            /** Format: date */
-            vencimento: string;
-            valor: number;
-            valorPrevisto: number;
-            valorPago?: number;
-            /** Format: date */
-            pagoEm?: string;
-            /** @enum {string} */
-            status: "A_PAGAR" | "PAGA" | "AGUARDANDO_FATURA" | "NA_FATURA";
         };
         NovoCartaoPedido: {
             apelido?: string;
@@ -1052,6 +1103,54 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ContaFixaResposta"];
+                };
+            };
+        };
+    };
+    ligar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LigacaoPedido"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OcorrenciaResposta"];
+                };
+            };
+        };
+    };
+    desligar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OcorrenciaResposta"];
                 };
             };
         };
@@ -1653,6 +1752,28 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HistoricoResposta"];
+                };
+            };
+        };
+    };
+    candidatas: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompraDaFatura"][];
                 };
             };
         };

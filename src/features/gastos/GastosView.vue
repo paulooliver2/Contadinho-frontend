@@ -134,6 +134,7 @@ function aoSalvar(mensagem: string) {
       v-model:aberta="ocorrenciaAberta"
       :item="aberta"
       :categoria="aberta ? categoria(aberta) : ''"
+      :cartao="aberta ? cartao(aberta) : undefined"
       @salvo="aoSalvar"
       @editar="editar"
     />
