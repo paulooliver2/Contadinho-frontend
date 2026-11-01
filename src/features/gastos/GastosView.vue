@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { mensagemDeErro } from '@/api/erros'
 import AbasSegmentadas from '@/components/AbasSegmentadas.vue'
 import BotaoAcao from '@/components/BotaoAcao.vue'
@@ -11,6 +12,7 @@ import EstadoVazio from '@/components/EstadoVazio.vue'
 import NavegadorMes from '@/components/NavegadorMes.vue'
 import TextoAjuda from '@/components/TextoAjuda.vue'
 import { hojeIso, mesPorExtenso, reais } from '@/lib/formatos'
+import { useAvisos } from '@/stores/avisos'
 import { useCartoes } from '@/stores/cartoes'
 import { useCategorias } from '@/stores/categorias'
 import ContaFixaFolha from './ContaFixaFolha.vue'
@@ -34,8 +36,14 @@ import OcorrenciaFolha from './OcorrenciaFolha.vue'
  */
 const categorias = useCategorias()
 const cartoes = useCartoes()
+const avisos = useAvisos()
+const route = useRoute()
+const router = useRouter()
 
-const mes = ref(hojeIso().slice(0, 7))
+/** Vindo de um aviso (HU-26.3): a conta do mês a abrir e o mês dela. */
+const textoDaRota = (nome: string) => (typeof route.query[nome] === 'string' ? (route.query[nome] as string) : null)
+
+const mes = ref(textoDaRota('mes') ?? hojeIso().slice(0, 7))
 const aba = ref<'FIXOS' | 'AVULSOS'>('FIXOS')
 const contas = ref<ContasDoMes | null>(null)
 const avulsos = ref<GastosDoMes | null>(null)
@@ -64,6 +72,7 @@ async function carregar() {
     if (pedido === mes.value) {
       contas.value = lidas
       avulsos.value = lidos
+      abrirDoAviso()
     }
   } catch (e) {
     erroCarga.value = mensagemDeErro(e)
@@ -73,6 +82,27 @@ async function carregar() {
 }
 
 watch(mes, carregar, { immediate: true })
+
+/** Abre a conta do aviso tocado, com "Marcar como paga", e tira o pedido da rota para não abrir de novo. */
+function abrirDoAviso() {
+  const id = textoDaRota('conta')
+  if (!id) return
+  const conta = contas.value?.contas.find((c) => c.id === id)
+  if (!conta) return
+  aba.value = 'FIXOS'
+  abrir(conta)
+  router.replace({ name: 'gastos' })
+}
+
+// Aviso tocado com a tela já aberta: troca de mês, se for o caso, e abre a conta.
+watch(
+  () => route.query.conta,
+  () => {
+    const doAviso = textoDaRota('mes')
+    if (doAviso && doAviso !== mes.value) mes.value = doAviso
+    else abrirDoAviso()
+  },
+)
 
 const nomeMes = computed(() => mesPorExtenso(mes.value).split(' de ')[0])
 const abas = computed(() => [
@@ -116,9 +146,17 @@ function abrirGasto(g: Gasto) {
   gastoAberto.value = true
 }
 
+/** Conta fixa criada, alterada, paga ou ligada à fatura: os avisos agendados mudam junto (HU-29.1). */
 function aoSalvar(mensagem: string) {
   aviso.value = mensagem
   carregar()
+  avisos.atualizar()
+}
+
+/** HU-25.1: a primeira conta fixa é a hora de explicar os avisos. */
+function aoSalvarConta(mensagem: string) {
+  if (!editando.value) avisos.oferecer()
+  aoSalvar(mensagem)
 }
 
 /** O gasto novo aparece na aba dele, no mês dele. */
@@ -224,7 +262,7 @@ function aoSalvarGasto(mensagem: string) {
       @salvo="aoSalvar"
       @editar="editar"
     />
-    <ContaFixaFolha v-model:aberta="folhaAberta" :editando="editando" @salvo="aoSalvar" />
+    <ContaFixaFolha v-model:aberta="folhaAberta" :editando="editando" @salvo="aoSalvarConta" />
     <GastoFolha v-model:aberta="gastoAberto" :editando="gastoEditando" @salvo="aoSalvarGasto" />
   </div>
 </template>

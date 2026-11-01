@@ -29,6 +29,7 @@ export const router = createRouter({
     { path: '/receber', name: 'receber', component: () => import('@/features/receber/ReceberView.vue'), meta: { abas: true } },
     { path: '/receitas', name: 'receitas', component: () => import('@/features/receitas/ReceitasView.vue'), meta: { abas: true, aba: 'inicio' } },
     { path: '/configuracoes', name: 'configuracoes', component: () => import('@/features/conta/ConfiguracoesView.vue'), meta: { abas: true, aba: 'inicio' } },
+    { path: '/avisos', name: 'avisos', component: () => import('@/features/avisos/AvisosView.vue'), meta: { abas: true, aba: 'inicio' } },
     { path: '/receber/:id', name: 'pessoa', component: () => import('@/features/receber/PessoaView.vue'), props: true, meta: { abas: true, aba: 'receber' } },
     { path: '/:caminho(.*)*', redirect: '/' },
   ],

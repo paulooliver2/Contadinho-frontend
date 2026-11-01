@@ -2,12 +2,22 @@
 import { computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import TabBar from '@/components/TabBar.vue'
+import ExplicacaoAvisosFolha from '@/features/avisos/ExplicacaoAvisosFolha.vue'
+import { aoTocar } from '@/lib/notificacoes'
+import { useAvisos } from '@/stores/avisos'
 import { useSessao } from '@/stores/sessao'
 
 const route = useRoute()
 const router = useRouter()
 const sessao = useSessao()
 const comAbas = computed(() => route.meta.abas === true)
+// Cria o store já na abertura: é ele que reagenda os avisos quando a sessão começa (HU-29.2).
+useAvisos()
+
+// HU-26.3: o aviso de conta abre a conta do mês, com "Marcar como paga".
+aoTocar(({ ocorrenciaId, mes }) => {
+  if (ocorrenciaId && mes) router.push({ name: 'gastos', query: { conta: ocorrenciaId, mes } })
+})
 
 // Sessão encerrada no meio do uso (refresh vencido ou revogado): volta para o login (HU-01.4).
 watch(
@@ -24,6 +34,7 @@ watch(
       <RouterView />
     </main>
     <TabBar v-if="comAbas" />
+    <ExplicacaoAvisosFolha />
   </div>
 </template>
 

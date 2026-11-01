@@ -7,6 +7,7 @@ import CabecalhoAba from '@/components/CabecalhoAba.vue'
 import CaixaAviso from '@/components/CaixaAviso.vue'
 import EstadoVazio from '@/components/EstadoVazio.vue'
 import IconeCartao from '@/components/IconeCartao.vue'
+import { useAvisos } from '@/stores/avisos'
 import { useCartoes, type Cartao } from '@/stores/cartoes'
 import FaturaCartao from './FaturaCartao.vue'
 import NovoCartaoFolha from './NovoCartaoFolha.vue'
@@ -36,7 +37,11 @@ async function carregar() {
 
 onMounted(carregar)
 
+const avisos = useAvisos()
+
 function aoCadastrar(cartao: Cartao) {
+  // HU-25.1: o primeiro cartão também é hora de explicar os avisos.
+  avisos.oferecer()
   selecionadoId.value = cartao.id
   aviso.value = `${cartao.apelido} •• ${cartao.ultimos4} cadastrado.`
 }

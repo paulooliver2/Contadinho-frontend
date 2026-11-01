@@ -5,11 +5,13 @@ import { mensagemDeErro } from '@/api/erros'
 import BotaoAcao from '@/components/BotaoAcao.vue'
 import BotaoVoltar from '@/components/BotaoVoltar.vue'
 import CaixaAviso from '@/components/CaixaAviso.vue'
+import CartaoAtalho from '@/components/CartaoAtalho.vue'
+import { useAvisos } from '@/stores/avisos'
 import { useConta } from '@/stores/conta'
 import { useSessao } from '@/stores/sessao'
 import ChavePixForm from './ChavePixForm.vue'
 
-/** Configurações: quem está logado, a chave Pix das cobranças (HU-03) e Sair. */
+/** Configurações: quem está logado, a chave Pix das cobranças (HU-03), os avisos (Épico 6) e Sair. */
 const router = useRouter()
 const conta = useConta()
 const sessao = useSessao()
@@ -33,7 +35,15 @@ async function carregar() {
   }
 }
 
-onMounted(carregar)
+const avisos = useAvisos()
+const estadoAvisos = computed(
+  () => ({ concedida: 'ligados', negada: 'bloqueados', perguntar: 'desligados', indisponivel: 'indisponíveis' })[avisos.permissao ?? 'perguntar'],
+)
+
+onMounted(() => {
+  carregar()
+  avisos.lerPermissao().catch(() => undefined)
+})
 
 async function removerPix() {
   if (removendo.value) return
@@ -88,6 +98,11 @@ async function sair() {
           {{ removendo ? 'Removendo…' : 'Remover chave' }}
         </button>
       </section>
+
+      <h2>Avisos</h2>
+      <CartaoAtalho titulo="Avisos" :detalhe="estadoAvisos" :para="{ name: 'avisos' }">
+        <span class="ajuda">Vencimento das contas fixas, 2 dias antes e no dia.</span>
+      </CartaoAtalho>
 
       <BotaoAcao variante="secundario" @click="sair">Sair</BotaoAcao>
     </template>
