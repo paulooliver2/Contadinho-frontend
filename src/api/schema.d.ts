@@ -132,6 +132,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/avisos/preferencias": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["preferencias"];
+        put: operations["salvar"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/receitas": {
         parameters: {
             query?: never;
@@ -917,6 +933,34 @@ export interface components {
             tipo: "CPF" | "EMAIL" | "CELULAR" | "ALEATORIA";
             chave: string;
         };
+        PreferenciasPedido: {
+            contaAtivo: boolean;
+            /** Format: int32 */
+            contaAntecedencia: number;
+            faturaFechouAtivo: boolean;
+            faturaReceberAtivo: boolean;
+            /** Format: int32 */
+            faturaAntecedencia: number;
+            silencioAtivo: boolean;
+            /** @example 22:00 */
+            silencioInicio: string;
+            /** @example 08:00 */
+            silencioFim: string;
+        };
+        PreferenciasResposta: {
+            contaAtivo: boolean;
+            /** Format: int32 */
+            contaAntecedencia: number;
+            faturaFechouAtivo: boolean;
+            faturaReceberAtivo: boolean;
+            /** Format: int32 */
+            faturaAntecedencia: number;
+            silencioAtivo: boolean;
+            /** @example 22:00 */
+            silencioInicio: string;
+            /** @example 08:00 */
+            silencioFim: string;
+        };
         ConfirmacaoReceitaPedido: {
             valorRecebido?: number;
         };
@@ -1628,6 +1672,50 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    preferencias: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreferenciasResposta"];
+                };
+            };
+        };
+    };
+    salvar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreferenciasPedido"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreferenciasResposta"];
+                };
             };
         };
     };

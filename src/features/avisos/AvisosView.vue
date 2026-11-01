@@ -8,10 +8,11 @@ import CaixaAviso from '@/components/CaixaAviso.vue'
 import TextoAjuda from '@/components/TextoAjuda.vue'
 import { diaMesCurto } from '@/lib/formatos'
 import { useAvisos } from '@/stores/avisos'
+import PreferenciasAvisos from './PreferenciasAvisos.vue'
 
 /**
  * Avisos (Épico 6): se o celular deixa avisar e, se não deixa, como reativar (HU-25.2). Com permissão, os próximos
- * avisos agendados.
+ * avisos agendados. Em qualquer caso, quais avisos e quando (HU-28).
  */
 const avisos = useAvisos()
 const erro = ref('')
@@ -38,6 +39,23 @@ async function permitir() {
   }
 }
 
+/** O que está ligado, com a antecedência escolhida (HU-28); antes de carregar, os padrões. Nada ligado: null. */
+const oQueAvisa = computed(() => {
+  const p = avisos.preferencias
+  const conta = p?.contaAtivo ?? true
+  const fechou = p?.faturaFechouAtivo ?? true
+  const receber = p?.faturaReceberAtivo ?? true
+  const partes: string[] = []
+  if (conta) {
+    const dias = p?.contaAntecedencia ?? 2
+    partes.push(`${dias === 1 ? '1 dia' : `${dias} dias`} antes e no dia do vencimento de cada conta fixa, às 9h`)
+  }
+  if (fechou) partes.push('quando cada fatura fecha')
+  if (receber) partes.push(`${p?.faturaAntecedencia ?? 3} dias antes de cada fatura vencer, se alguém ainda deve a parte dela`)
+  if (partes.length === 0) return null
+  return partes.length === 1 ? partes[0] : `${partes.slice(0, -1).join(', ')} e ${partes[partes.length - 1]}`
+})
+
 const proximos = computed(() =>
   avisos.agendados.map((a) => ({ ...a, dia: `${diaMesCurto(a.quando.slice(0, 10))} às ${Number(a.quando.slice(11, 13))}h` })),
 )
@@ -53,7 +71,7 @@ const proximos = computed(() =>
     <section class="cartao" aria-labelledby="titulo-estado">
       <template v-if="avisos.permissao === 'concedida'">
         <h2 id="titulo-estado">Avisos ligados</h2>
-        <p class="texto">O Contadinho avisa 2 dias antes e no dia do vencimento de cada conta fixa, às 9h, quando cada fatura fecha e, 3 dias antes de ela vencer, se alguém ainda deve a parte dela.</p>
+        <p class="texto">{{ oQueAvisa ? `O Contadinho avisa ${oQueAvisa}.` : 'Todos os tipos de aviso estão desligados abaixo.' }}</p>
       </template>
       <template v-else-if="avisos.permissao === 'negada'">
         <h2 id="titulo-estado">Avisos bloqueados no celular</h2>
@@ -71,7 +89,7 @@ const proximos = computed(() =>
       </template>
       <template v-else-if="avisos.permissao === 'perguntar'">
         <h2 id="titulo-estado">Avisos desligados</h2>
-        <p class="texto">Ligue para ser avisado 2 dias antes e no dia do vencimento de cada conta fixa, às 9h, quando cada fatura fecha e, 3 dias antes de ela vencer, se alguém ainda deve a parte dela.</p>
+        <p class="texto">{{ oQueAvisa ? `Ligue para o Contadinho avisar ${oQueAvisa}.` : 'Ligue e escolha abaixo o que avisar.' }}</p>
         <BotaoAcao :carregando="pedindo" texto-carregando="Pedindo…" @click="permitir">Ativar avisos</BotaoAcao>
       </template>
       <p v-else class="texto" role="status">Carregando…</p>
@@ -90,6 +108,8 @@ const proximos = computed(() =>
       <p v-else class="texto vazio">Nenhum aviso nos próximos 60 dias.</p>
       <TextoAjuda v-if="!noCelular">No navegador, os avisos não ficam agendados: eles chegam pelo app no celular.</TextoAjuda>
     </template>
+
+    <PreferenciasAvisos v-if="avisos.permissao" />
   </div>
 </template>
 

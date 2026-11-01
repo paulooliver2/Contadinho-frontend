@@ -7,6 +7,7 @@ import * as notificacoes from '@/lib/notificacoes'
 import { useSessao } from './sessao'
 
 export type Aviso = components['schemas']['AvisoResposta']
+export type Preferencias = components['schemas']['PreferenciasResposta']
 
 /** Já explicou os avisos neste aparelho: a explicação aparece uma vez só (HU-25). */
 const EXPLICADO = 'contadinho.avisos-explicados'
@@ -29,6 +30,24 @@ export const useAvisos = defineStore('avisos', () => {
   const agendados = ref<Aviso[]>([])
   /** A folha que explica os avisos antes do pedido do sistema. */
   const explicando = ref(false)
+  /** HU-28: ficam no servidor, então valem em qualquer celular. */
+  const preferencias = ref<Preferencias | null>(null)
+
+  async function carregarPreferencias() {
+    const { data, error, response } = await api.GET('/api/avisos/preferencias')
+    if (!data) throw erroDaApi(error, response)
+    preferencias.value = data
+    return data
+  }
+
+  /** Salva e reagenda: a agenda nova já sai com as preferências (HU-28, HU-29.1). */
+  async function salvarPreferencias(novas: Preferencias) {
+    const { data, error, response } = await api.PUT('/api/avisos/preferencias', { body: novas })
+    if (!data) throw erroDaApi(error, response)
+    preferencias.value = data
+    atualizar()
+    return data
+  }
 
   async function lerPermissao() {
     permissao.value = await notificacoes.lerPermissao()
@@ -108,11 +127,25 @@ export const useAvisos = defineStore('avisos', () => {
         atualizar()
       } else if (antes) {
         agendados.value = []
+        preferencias.value = null
         notificacoes.cancelarTodas().catch(() => undefined)
       }
     },
     { immediate: true },
   )
 
-  return { permissao, agendados, explicando, lerPermissao, reagendar, atualizar, oferecer, explicado, permitir }
+  return {
+    permissao,
+    agendados,
+    explicando,
+    preferencias,
+    lerPermissao,
+    reagendar,
+    atualizar,
+    oferecer,
+    explicado,
+    permitir,
+    carregarPreferencias,
+    salvarPreferencias,
+  }
 })
