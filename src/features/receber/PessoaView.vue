@@ -9,9 +9,10 @@ import CartaoResumo from '@/components/CartaoResumo.vue'
 import EstadoVazio from '@/components/EstadoVazio.vue'
 import IconeCartao from '@/components/IconeCartao.vue'
 import LinhaLancamento from '@/features/cartoes/LinhaLancamento.vue'
-import { mesPorExtenso, reais } from '@/lib/formatos'
+import { cobradoHa, mesPorExtenso, reais } from '@/lib/formatos'
 import { formatarWhatsapp } from '@/lib/telefone'
 import { usePessoas } from '@/stores/pessoas'
+import CobrancaFolha from './CobrancaFolha.vue'
 import EmprestimoCartao from './EmprestimoCartao.vue'
 import EmprestimoFolha from './EmprestimoFolha.vue'
 import LinhaPagamento from './LinhaPagamento.vue'
@@ -22,7 +23,7 @@ import SeloStatus from './SeloStatus.vue'
 
 /**
  * HU-18.3: o saldo da pessoa e o histórico do que ela deve, fatura por fatura, com os empréstimos (HU-17) e os
- * pagamentos (HU-19). Daqui também se edita a pessoa.
+ * pagamentos (HU-19). Daqui se cobra pelo WhatsApp (HU-20) e se edita a pessoa.
  */
 const props = defineProps<{ id: string }>()
 
@@ -34,6 +35,9 @@ const aviso = ref('')
 const folhaAberta = ref(false)
 const pagamentoAberto = ref(false)
 const emprestimoAberto = ref(false)
+const cobrancaAberta = ref(false)
+/** HU-20.3: sem WhatsApp, "Cobrar" abre a edição; salvo o número, segue para a cobrança. */
+const cobrarDepoisDeSalvar = ref(false)
 /** O pagamento sendo desfeito ou o empréstimo sendo excluído: um por vez. */
 const ocupado = ref<string | null>(null)
 const erroAcao = ref('')
@@ -71,6 +75,31 @@ watch(pessoa, (atual, anterior) => {
 
 function aoSalvar(mensagem: string) {
   aviso.value = mensagem
+  carregar()
+}
+
+function cobrar() {
+  if (pessoa.value?.whatsapp) {
+    cobrancaAberta.value = true
+    return
+  }
+  cobrarDepoisDeSalvar.value = true
+  folhaAberta.value = true
+}
+
+function aoSalvarPessoa(mensagem: string) {
+  aoSalvar(mensagem)
+  if (cobrarDepoisDeSalvar.value && pessoa.value?.whatsapp) cobrancaAberta.value = true
+  cobrarDepoisDeSalvar.value = false
+}
+
+// Fechou a edição sem salvar: não segue para a cobrança.
+watch(folhaAberta, (aberta) => {
+  if (!aberta) cobrarDepoisDeSalvar.value = false
+})
+
+function aoCobrar() {
+  aviso.value = 'Cobrança aberta no WhatsApp. É só conferir e enviar.'
   carregar()
 }
 
@@ -122,6 +151,7 @@ function excluir(id: string) {
           <p class="contato">
             {{ pessoa.whatsapp ? formatarWhatsapp(pessoa.whatsapp) : 'sem WhatsApp' }}
             <template v-if="pessoa.arquivada"> · arquivada</template>
+            <template v-if="historico.situacao.saldo > 0 && historico.situacao.ultimaCobranca"> · {{ cobradoHa(historico.situacao.ultimaCobranca) }}</template>
           </p>
         </div>
         <button type="button" class="editar" @click="folhaAberta = true">Editar</button>
@@ -136,7 +166,10 @@ function excluir(id: string) {
         </p>
       </CartaoResumo>
 
-      <BotaoAcao v-if="historico.situacao.saldo > 0" @click="pagamentoAberto = true">Marcar como pago</BotaoAcao>
+      <div v-if="historico.situacao.saldo > 0" class="botoes">
+        <BotaoAcao variante="secundario" @click="cobrar">{{ pessoa.whatsapp ? 'Cobrar' : 'Adicionar WhatsApp' }}</BotaoAcao>
+        <BotaoAcao @click="pagamentoAberto = true">Marcar como pago</BotaoAcao>
+      </div>
       <p v-else-if="historico.situacao.saldo < 0" class="credito">
         {{ pessoa.apelido ?? pessoa.nome }} tem {{ reais(-historico.situacao.saldo) }} de crédito: ele abate o que for registrado depois.
       </p>
@@ -183,7 +216,8 @@ function excluir(id: string) {
         <template #icone><IconeCartao :tamanho="28" /></template>
       </EstadoVazio>
 
-      <PessoaFolha v-model:aberta="folhaAberta" :editando="pessoa" @salvo="aoSalvar" />
+      <PessoaFolha v-model:aberta="folhaAberta" :editando="pessoa" @salvo="aoSalvarPessoa" />
+      <CobrancaFolha v-model:aberta="cobrancaAberta" :pessoa="pessoa" :historico="historico" @cobrado="aoCobrar" />
       <PagamentoFolha
         v-model:aberta="pagamentoAberto"
         :pessoa-id="pessoa.id"
@@ -264,6 +298,12 @@ h2 {
   border-radius: var(--raio-card);
   background: var(--superficie);
   overflow: hidden;
+}
+
+.botoes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
 .credito {

@@ -52,6 +52,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/conta/pix": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["definirPix"];
+        post?: never;
+        delete: operations["removerPix"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/receber/pessoas/{pessoaId}/pagamentos": {
         parameters: {
             query?: never;
@@ -62,6 +78,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["registrar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/receber/pessoas/{pessoaId}/cobrancas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["cobrar"];
         delete?: never;
         options?: never;
         head?: never;
@@ -458,6 +490,16 @@ export interface components {
             /** Format: int32 */
             proximas: number;
         };
+        PixPedido: {
+            /** @enum {string} */
+            tipo: "CPF" | "EMAIL" | "CELULAR" | "ALEATORIA";
+            chave: string;
+        };
+        Pix: {
+            /** @enum {string} */
+            tipo: "CPF" | "EMAIL" | "CELULAR" | "ALEATORIA";
+            chave: string;
+        };
         PagamentoPedido: {
             valor: number;
             /** Format: date */
@@ -469,6 +511,11 @@ export interface components {
             valor: number;
             /** Format: date */
             recebidoEm: string;
+        };
+        CobrancaResposta: {
+            valor: number;
+            /** Format: date-time */
+            enviadaEm: string;
         };
         EmprestimoPedido: {
             /** Format: uuid */
@@ -626,6 +673,8 @@ export interface components {
             status: "PENDENTE" | "PAGOU_PARTE" | "PAGO";
             /** Format: date */
             proximoVencimento?: string;
+            /** Format: date-time */
+            ultimaCobranca?: string;
         };
         CompraResposta: {
             /** Format: uuid */
@@ -668,6 +717,7 @@ export interface components {
             id: string;
             nome: string;
             email: string;
+            pix?: components["schemas"]["Pix"];
         };
         FaturaResposta: {
             mes: string;
@@ -821,6 +871,48 @@ export interface operations {
             };
         };
     };
+    definirPix: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PixPedido"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Pix"];
+                };
+            };
+        };
+    };
+    removerPix: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     registrar: {
         parameters: {
             query?: never;
@@ -843,6 +935,28 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PagamentoResposta"];
+                };
+            };
+        };
+    };
+    cobrar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                pessoaId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CobrancaResposta"];
                 };
             };
         };

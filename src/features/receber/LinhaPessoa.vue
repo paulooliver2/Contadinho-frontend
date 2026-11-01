@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { diaMes, hojeIso, reais } from '@/lib/formatos'
+import { cobradoHa, diaMes, hojeIso, reais } from '@/lib/formatos'
 import { formatarWhatsapp } from '@/lib/telefone'
 import type { Pessoa } from '@/stores/pessoas'
 import type { Situacao } from './receber'
@@ -8,7 +8,7 @@ import SeloStatus from './SeloStatus.vue'
 
 /**
  * Uma pessoa na lista de A receber: iniciais, nome e, com `situacao`, o saldo, o status e o vencimento mais
- * próximo (HU-18). Sem nada registrado, mostra apelido e WhatsApp. Tocar abre o histórico.
+ * próximo (HU-18), e quando foi cobrada (HU-20.4). Sem nada registrado, mostra apelido e WhatsApp. Tocar abre o histórico.
  */
 const props = defineProps<{ pessoa: Pessoa; situacao?: Situacao }>()
 const emit = defineEmits<{ abrir: [] }>()
@@ -27,6 +27,7 @@ const detalhes = computed(() => {
     if (s.proximoVencimento) {
       partes.push(`${s.proximoVencimento < hojeIso() ? 'venceu' : 'vence'} ${diaMes(s.proximoVencimento)}`)
     }
+    if (s.ultimaCobranca) partes.push(cobradoHa(s.ultimaCobranca))
     return partes.join(' · ')
   }
   const partes: string[] = []

@@ -40,6 +40,17 @@ export function somarMesesData(iso: string, quantos: number): string {
   return `${alvo}-${String(Math.min(dia, ultimo)).padStart(2, '0')}`
 }
 
+/** HU-20.4: "cobrado hoje", "cobrado ontem" ou "cobrado há 3 dias", contando dias do calendário do aparelho. */
+export function cobradoHa(instante: string): string {
+  const quando = new Date(instante)
+  const agora = new Date()
+  const dia = (d: Date) => Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())
+  const dias = Math.round((dia(agora) - dia(quando)) / 86_400_000)
+  if (dias <= 0) return 'cobrado hoje'
+  if (dias === 1) return 'cobrado ontem'
+  return `cobrado há ${dias} dias`
+}
+
 /** Hoje no fuso do aparelho, como yyyy-MM-dd. */
 export function hojeIso(): string {
   const agora = new Date()
