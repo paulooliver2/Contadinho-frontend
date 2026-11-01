@@ -36,6 +36,25 @@ export async function encerrarContaFixa(id: string): Promise<ContaFixa> {
   return data
 }
 
+/** HU-13.1: sem data, vale hoje; sem valor, o previsto. Conta no cartão é recusada: entra pela fatura. */
+export async function pagarConta(id: string, dados: { pagoEm?: string; valorPago?: number }): Promise<ContaDoMes> {
+  const { data, error, response } = await api.POST('/api/contas-fixas/ocorrencias/{id}/pagamento', {
+    params: { path: { id } },
+    body: dados,
+  })
+  if (!data) throw erroDaApi(error, response)
+  return data
+}
+
+/** HU-13.3: volta a ficar a pagar; débito automático desfeito não é marcado de novo (RN-24). */
+export async function desfazerPagamentoConta(id: string): Promise<ContaDoMes> {
+  const { data, error, response } = await api.DELETE('/api/contas-fixas/ocorrencias/{id}/pagamento', {
+    params: { path: { id } },
+  })
+  if (!data) throw erroDaApi(error, response)
+  return data
+}
+
 /** HU-11.1, como se lê na tela. */
 export const FORMAS: readonly { valor: FormaPagamento; rotulo: string }[] = [
   { valor: 'PIX_BOLETO', rotulo: 'Pix ou boleto' },

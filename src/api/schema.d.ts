@@ -212,6 +212,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/contas-fixas/ocorrencias/{id}/pagamento": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["pagar"];
+        delete: operations["desfazerPagamento"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/cartoes": {
         parameters: {
             query?: never;
@@ -652,6 +668,26 @@ export interface components {
             /** Format: date */
             vencimento?: string;
         };
+        PagamentoContaPedido: {
+            /** Format: date */
+            pagoEm?: string;
+            valorPago?: number;
+        };
+        OcorrenciaResposta: {
+            /** Format: uuid */
+            id: string;
+            conta: components["schemas"]["ContaFixaResposta"];
+            valorAtual: number;
+            /** Format: date */
+            vencimento: string;
+            valor: number;
+            valorPrevisto: number;
+            valorPago?: number;
+            /** Format: date */
+            pagoEm?: string;
+            /** @enum {string} */
+            status: "A_PAGAR" | "PAGA" | "AGUARDANDO_FATURA" | "NA_FATURA";
+        };
         NovoCartaoPedido: {
             apelido?: string;
             /** @enum {string} */
@@ -827,17 +863,6 @@ export interface components {
             aPagar: number;
             noCartao: number;
             contas: components["schemas"]["OcorrenciaResposta"][];
-        };
-        OcorrenciaResposta: {
-            /** Format: uuid */
-            id: string;
-            conta: components["schemas"]["ContaFixaResposta"];
-            valorAtual: number;
-            /** Format: date */
-            vencimento: string;
-            valor: number;
-            /** @enum {string} */
-            status: "A_PAGAR" | "PAGA" | "AGUARDANDO_FATURA" | "NA_FATURA";
         };
         Conta: {
             /** Format: uuid */
@@ -1277,6 +1302,54 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ContaFixaResposta"];
+                };
+            };
+        };
+    };
+    pagar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PagamentoContaPedido"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OcorrenciaResposta"];
+                };
+            };
+        };
+    };
+    desfazerPagamento: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OcorrenciaResposta"];
                 };
             };
         };

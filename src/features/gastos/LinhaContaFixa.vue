@@ -5,7 +5,7 @@ import type { ContaDoMes } from './gastos'
 
 /**
  * Uma conta fixa no mês (HU-11): iniciais da categoria, como se paga, o valor e o status (RN-57). A pagar mostra
- * quanto falta para vencer. Tocar abre o cadastro.
+ * quanto falta para vencer. Tocar abre a conta do mês (HU-13).
  */
 const props = defineProps<{ item: ContaDoMes; categoria: string; cartao?: string }>()
 const emit = defineEmits<{ abrir: [] }>()
@@ -39,7 +39,7 @@ const selo = computed((): { texto: string; tom: string } => {
 
 <template>
   <li>
-    <button type="button" class="linha" :aria-label="`Editar ${item.conta.descricao}`" @click="emit('abrir')">
+    <button type="button" class="linha" :aria-label="`Abrir ${item.conta.descricao}`" @click="emit('abrir')">
       <span class="iniciais" aria-hidden="true">{{ iniciais }}</span>
       <span class="textos">
         <span class="descricao">{{ item.conta.descricao }}</span>

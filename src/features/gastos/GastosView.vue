@@ -14,10 +14,11 @@ import { useCategorias } from '@/stores/categorias'
 import ContaFixaFolha from './ContaFixaFolha.vue'
 import { buscarContasDoMes, type ContaDoMes, type ContasDoMes } from './gastos'
 import LinhaContaFixa from './LinhaContaFixa.vue'
+import OcorrenciaFolha from './OcorrenciaFolha.vue'
 
 /**
  * Gastos (HU-11): as contas fixas do mês, pelo vencimento, com o total e quanto já foi pago, quanto falta e quanto
- * vai pelo cartão. Tocar numa conta abre o cadastro.
+ * vai pelo cartão. Tocar numa conta abre a conta do mês, para marcar como paga (HU-13); de lá se edita o cadastro.
  */
 const categorias = useCategorias()
 const cartoes = useCartoes()
@@ -29,6 +30,8 @@ const erroCarga = ref('')
 const aviso = ref('')
 const folhaAberta = ref(false)
 const editando = ref<ContaDoMes | null>(null)
+const ocorrenciaAberta = ref(false)
+const aberta = ref<ContaDoMes | null>(null)
 
 async function carregar() {
   erroCarga.value = ''
@@ -68,7 +71,13 @@ function nova() {
 }
 
 function abrir(c: ContaDoMes) {
-  editando.value = c
+  aberta.value = c
+  ocorrenciaAberta.value = true
+}
+
+function editar() {
+  editando.value = aberta.value
+  ocorrenciaAberta.value = false
   folhaAberta.value = true
 }
 
@@ -121,6 +130,13 @@ function aoSalvar(mensagem: string) {
 
     <p v-else class="carregando" role="status">Carregando…</p>
 
+    <OcorrenciaFolha
+      v-model:aberta="ocorrenciaAberta"
+      :item="aberta"
+      :categoria="aberta ? categoria(aberta) : ''"
+      @salvo="aoSalvar"
+      @editar="editar"
+    />
     <ContaFixaFolha v-model:aberta="folhaAberta" :editando="editando" @salvo="aoSalvar" />
   </div>
 </template>
