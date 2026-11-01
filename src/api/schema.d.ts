@@ -500,7 +500,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/receitas/mes/{mes}": {
+    "/api/resumo/mes/{mes}": {
         parameters: {
             query?: never;
             header?: never;
@@ -508,6 +508,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["doMes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/receitas/mes/{mes}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["doMes_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -555,7 +571,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["doMes_1"];
+        get: operations["doMes_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -587,7 +603,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["doMes_2"];
+        get: operations["doMes_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1046,6 +1062,34 @@ export interface components {
             /** Format: email */
             email: string;
             senha: string;
+        };
+        DespesasDoResumo: {
+            total: number;
+            pago: number;
+            aPagar: number;
+            faturas: number;
+            contasFixas: number;
+            avulsos: number;
+        };
+        FaturaDoResumo: {
+            /** Format: uuid */
+            cartaoId: string;
+            cartao: string;
+            /** Format: date */
+            vencimento: string;
+            total: number;
+            minhaParte: number;
+        };
+        ReceitasDoResumo: {
+            total: number;
+            recebido: number;
+            previsto: number;
+        };
+        ResumoDoMesResposta: {
+            saldo: number;
+            receitas: components["schemas"]["ReceitasDoResumo"];
+            despesas: components["schemas"]["DespesasDoResumo"];
+            faturas: components["schemas"]["FaturaDoResumo"][];
         };
         ReceitasDoMesResposta: {
             total: number;
@@ -2145,6 +2189,28 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    "application/json": components["schemas"]["ResumoDoMesResposta"];
+                };
+            };
+        };
+    };
+    doMes_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                mes: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
                     "application/json": components["schemas"]["ReceitasDoMesResposta"];
                 };
             };
@@ -2192,7 +2258,7 @@ export interface operations {
             };
         };
     };
-    doMes_1: {
+    doMes_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -2236,7 +2302,7 @@ export interface operations {
             };
         };
     };
-    doMes_2: {
+    doMes_3: {
         parameters: {
             query?: never;
             header?: never;
