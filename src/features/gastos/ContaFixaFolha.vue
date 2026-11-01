@@ -13,6 +13,7 @@ import { useErrosDeCampos } from '@/lib/errosDeCampos'
 import { diaMes, hojeIso, lerValor, mesPorExtenso, somarMeses, valorParaCampo } from '@/lib/formatos'
 import { useCartoes } from '@/stores/cartoes'
 import { useCategorias } from '@/stores/categorias'
+import EssencialEscolha from './EssencialEscolha.vue'
 import {
   alterarContaFixa,
   cadastrarContaFixa,
@@ -34,20 +35,14 @@ const emit = defineEmits<{ salvo: [mensagem: string] }>()
 const categorias = useCategorias()
 const cartoes = useCartoes()
 
-const ESSENCIAL = [
-  { valor: 'SIM', rotulo: 'Sim' },
-  { valor: 'NAO', rotulo: 'Não' },
-] as const
-
 const descricao = ref('')
 const valor = ref('')
 const categoriaId = ref<string | null>(null)
 const dia = ref('')
 const forma = ref<FormaPagamento | null>('PIX_BOLETO')
 const cartaoId = ref<string | null>(null)
-const essencial = ref<'SIM' | 'NAO' | null>(null)
-/** Enquanto o dono não escolhe, o essencial segue a categoria (RN-28). */
-const essencialTocado = ref(false)
+/** Null segue a categoria (RN-28). */
+const essencial = ref<boolean | null>(null)
 const erros = useErrosDeCampos({ descricao, valor, categoriaId, diaVencimento: dia, formaPagamento: forma, cartaoId: [cartaoId, forma] })
 const erro = ref('')
 const enviando = ref(false)
@@ -74,28 +69,12 @@ watch(aberta, (abriu) => {
   dia.value = e ? String(e.conta.diaVencimento) : ''
   forma.value = e?.conta.formaPagamento ?? 'PIX_BOLETO'
   cartaoId.value = e?.conta.cartaoId ?? null
-  essencialTocado.value = e?.conta.essencial != null
-  essencial.value = e?.conta.essencial == null ? null : e.conta.essencial ? 'SIM' : 'NAO'
-  if (!essencialTocado.value) seguirCategoria()
+  essencial.value = e?.conta.essencial ?? null
   erros.value = {}
   erro.value = ''
   confirmandoEncerrar.value = false
   if (!cartoes.carregado) cartoes.carregar().catch(() => {})
 })
-
-function seguirCategoria() {
-  const c = categoriaId.value ? categorias.porId(categoriaId.value) : undefined
-  essencial.value = c ? (c.essencial ? 'SIM' : 'NAO') : null
-}
-
-watch(categoriaId, () => {
-  if (!essencialTocado.value) seguirCategoria()
-})
-
-function escolherEssencial(v: 'SIM' | 'NAO' | null) {
-  essencial.value = v
-  essencialTocado.value = true
-}
 
 /** As ativas; na edição, a categoria atual entra mesmo se foi arquivada (RN-27). */
 const opcoesCategorias = computed(() => {
@@ -128,7 +107,7 @@ function montar(): DadosContaFixa | null {
     diaVencimento: numeroDia,
     formaPagamento: forma.value!,
     cartaoId: forma.value === 'CARTAO' ? cartaoId.value! : undefined,
-    essencial: essencial.value === null ? undefined : essencial.value === 'SIM',
+    essencial: essencial.value ?? undefined,
   }
 }
 
@@ -200,7 +179,7 @@ function encerrar() {
         <TextoAjuda>Ela aparece aqui e na fatura, mas só entra uma vez no total do mês.</TextoAjuda>
       </template>
 
-      <ChipsEscolha :model-value="essencial" rotulo="É essencial?" :opcoes="ESSENCIAL" @update:model-value="escolherEssencial" />
+      <EssencialEscolha v-model="essencial" :categoria-id="categoriaId" />
 
       <CaixaAviso :mensagem="erro" />
 

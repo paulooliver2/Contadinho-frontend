@@ -52,7 +52,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/contas-fixas/{id}": {
+    "/api/gastos/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -61,6 +61,22 @@ export interface paths {
         };
         get?: never;
         put: operations["alterar_1"];
+        post?: never;
+        delete: operations["excluir_2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/contas-fixas/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["alterar_2"];
         post?: never;
         delete?: never;
         options?: never;
@@ -196,7 +212,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/contas-fixas": {
+    "/api/gastos": {
         parameters: {
             query?: never;
             header?: never;
@@ -206,6 +222,22 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["cadastrar_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/contas-fixas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["cadastrar_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -253,7 +285,7 @@ export interface paths {
         };
         get: operations["listar_1"];
         put?: never;
-        post: operations["cadastrar_2"];
+        post: operations["cadastrar_3"];
         delete?: never;
         options?: never;
         head?: never;
@@ -397,7 +429,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["cadastrar_3"];
+        post: operations["cadastrar_4"];
         delete?: never;
         options?: never;
         head?: never;
@@ -436,6 +468,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/gastos/mes/{mes}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["doMes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/contas-fixas/ocorrencias/{id}/candidatas": {
         parameters: {
             query?: never;
@@ -459,7 +507,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["doMes"];
+        get: operations["doMes_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -558,7 +606,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete: operations["excluir_2"];
+        delete: operations["excluir_3"];
         options?: never;
         head?: never;
         patch?: never;
@@ -618,6 +666,51 @@ export interface components {
             /** Format: int32 */
             proximas: number;
         };
+        GastoPedido: {
+            descricao: string;
+            valor: number;
+            /** Format: date */
+            data?: string;
+            /** Format: uuid */
+            categoriaId: string;
+            /** @enum {string} */
+            formaPagamento: "PIX_BOLETO" | "DEBITO" | "CARTAO";
+            /** Format: uuid */
+            cartaoId?: string;
+            essencial?: boolean;
+        };
+        CompraDaFatura: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date */
+            data: string;
+            descricao: string;
+            valor: number;
+            /** Format: int32 */
+            parcelaAtual?: number;
+            /** Format: int32 */
+            parcelaTotal?: number;
+            cartao: string;
+            fatura: string;
+        };
+        GastoResposta: {
+            /** Format: uuid */
+            id: string;
+            descricao: string;
+            valor: number;
+            /** Format: date */
+            data: string;
+            /** Format: uuid */
+            categoriaId: string;
+            /** @enum {string} */
+            formaPagamento: "PIX_BOLETO" | "DEBITO" | "CARTAO";
+            /** Format: uuid */
+            cartaoId?: string;
+            essencial?: boolean;
+            /** @enum {string} */
+            status: "PAGO" | "AGUARDANDO_FATURA" | "NA_FATURA";
+            compra?: components["schemas"]["CompraDaFatura"];
+        };
         ContaFixaPedido: {
             descricao: string;
             valor: number;
@@ -650,20 +743,6 @@ export interface components {
         LigacaoPedido: {
             /** Format: uuid */
             lancamentoId: string;
-        };
-        CompraDaFatura: {
-            /** Format: uuid */
-            id: string;
-            /** Format: date */
-            data: string;
-            descricao: string;
-            valor: number;
-            /** Format: int32 */
-            parcelaAtual?: number;
-            /** Format: int32 */
-            parcelaTotal?: number;
-            cartao: string;
-            fatura: string;
         };
         OcorrenciaResposta: {
             /** Format: uuid */
@@ -908,6 +987,11 @@ export interface components {
             vencimento?: string;
             emAberto: number;
         };
+        GastosDoMesResposta: {
+            total: number;
+            noCartao: number;
+            gastos: components["schemas"]["GastoResposta"][];
+        };
         ContasDoMesResposta: {
             total: number;
             pago: number;
@@ -1082,6 +1166,52 @@ export interface operations {
         };
     };
     alterar_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GastoPedido"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GastoResposta"];
+                };
+            };
+        };
+    };
+    excluir_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    alterar_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -1368,6 +1498,30 @@ export interface operations {
         };
         requestBody: {
             content: {
+                "application/json": components["schemas"]["GastoPedido"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GastoResposta"];
+                };
+            };
+        };
+    };
+    cadastrar_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
                 "application/json": components["schemas"]["ContaFixaPedido"];
             };
         };
@@ -1473,7 +1627,7 @@ export interface operations {
             };
         };
     };
-    cadastrar_2: {
+    cadastrar_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -1690,7 +1844,7 @@ export interface operations {
             };
         };
     };
-    cadastrar_3: {
+    cadastrar_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -1756,6 +1910,28 @@ export interface operations {
             };
         };
     };
+    doMes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                mes: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GastosDoMesResposta"];
+                };
+            };
+        };
+    };
     candidatas: {
         parameters: {
             query?: never;
@@ -1778,7 +1954,7 @@ export interface operations {
             };
         };
     };
-    doMes: {
+    doMes_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -1903,7 +2079,7 @@ export interface operations {
             };
         };
     };
-    excluir_2: {
+    excluir_3: {
         parameters: {
             query?: never;
             header?: never;

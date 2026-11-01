@@ -85,6 +85,38 @@ export async function desligarDaFatura(id: string): Promise<ContaDoMes> {
   return data
 }
 
+export type GastosDoMes = components['schemas']['GastosDoMesResposta']
+export type Gasto = components['schemas']['GastoResposta']
+export type DadosGasto = components['schemas']['GastoPedido']
+export type FormaGasto = DadosGasto['formaPagamento']
+
+/** HU-12: os gastos avulsos do mês (yyyy-MM), do mais recente para o mais antigo. */
+export async function buscarGastosDoMes(mes: string): Promise<GastosDoMes> {
+  const { data, error, response } = await api.GET('/api/gastos/mes/{mes}', { params: { path: { mes } } })
+  if (!data) throw erroDaApi(error, response)
+  return data
+}
+
+/** HU-12.1. No cartão, já volta ligado se a fatura com a compra chegou (RN-26). */
+export async function registrarGasto(dados: DadosGasto): Promise<Gasto> {
+  const { data, error, response } = await api.POST('/api/gastos', { body: dados })
+  if (!data) throw erroDaApi(error, response)
+  return data
+}
+
+/** HU-46.1. */
+export async function alterarGasto(id: string, dados: DadosGasto): Promise<Gasto> {
+  const { data, error, response } = await api.PUT('/api/gastos/{id}', { params: { path: { id } }, body: dados })
+  if (!data) throw erroDaApi(error, response)
+  return data
+}
+
+/** HU-46.1: o lançamento da fatura não muda (HU-46.3). */
+export async function excluirGasto(id: string): Promise<void> {
+  const { error, response } = await api.DELETE('/api/gastos/{id}', { params: { path: { id } } })
+  if (!response.ok) throw erroDaApi(error, response)
+}
+
 /** HU-11.1, como se lê na tela. */
 export const FORMAS: readonly { valor: FormaPagamento; rotulo: string }[] = [
   { valor: 'PIX_BOLETO', rotulo: 'Pix ou boleto' },
