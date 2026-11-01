@@ -500,6 +500,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/resumo/proximos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["proximos"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/resumo/mes/{mes}": {
         parameters: {
             query?: never;
@@ -1062,6 +1078,50 @@ export interface components {
             /** Format: email */
             email: string;
             senha: string;
+        };
+        AReceberDoInicioResposta: {
+            total: number;
+            original: number;
+            devedores: components["schemas"]["DevedorResposta"][];
+        };
+        ContasAVencerResposta: {
+            fixosPorMes: number;
+            proximas: components["schemas"]["ProximaContaResposta"][];
+        };
+        DevedorResposta: {
+            /** Format: uuid */
+            pessoaId: string;
+            saldo: number;
+            pagouParte: boolean;
+        };
+        FaturaAtualResposta: {
+            /** Format: uuid */
+            cartaoId: string;
+            cartao: string;
+            mes: string;
+            /** Format: date */
+            vencimento: string;
+            fechada: boolean;
+            total: number;
+            partes: components["schemas"]["ParteDaFaturaAtual"][];
+        };
+        ParteDaFaturaAtual: {
+            /** Format: uuid */
+            pessoaId?: string;
+            total: number;
+        };
+        ProximaContaResposta: {
+            /** Format: uuid */
+            ocorrenciaId: string;
+            descricao: string;
+            /** Format: date */
+            vencimento: string;
+            valor: number;
+        };
+        ProximosResposta: {
+            contas: components["schemas"]["ContasAVencerResposta"];
+            aReceber: components["schemas"]["AReceberDoInicioResposta"];
+            faturas: components["schemas"]["FaturaAtualResposta"][];
         };
         DespesasDoResumo: {
             total: number;
@@ -2168,6 +2228,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Tokens"];
+                };
+            };
+        };
+    };
+    proximos: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProximosResposta"];
                 };
             };
         };

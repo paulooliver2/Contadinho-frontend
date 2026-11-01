@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import IniciaisPessoa from '@/components/IniciaisPessoa.vue'
 import { cobradoHa, diaMes, hojeIso, reais } from '@/lib/formatos'
 import { formatarWhatsapp } from '@/lib/telefone'
 import type { Pessoa } from '@/stores/pessoas'
@@ -12,12 +13,6 @@ import SeloStatus from './SeloStatus.vue'
  */
 const props = defineProps<{ pessoa: Pessoa; situacao?: Situacao }>()
 const emit = defineEmits<{ abrir: [] }>()
-
-const iniciais = computed(() => {
-  const partes = props.pessoa.nome.split(/\s+/).filter(Boolean)
-  const letras = partes.length > 1 ? partes[0]![0]! + partes[partes.length - 1]![0]! : props.pessoa.nome.slice(0, 2)
-  return letras.toUpperCase()
-})
 
 const detalhes = computed(() => {
   const p = props.pessoa
@@ -39,8 +34,8 @@ const detalhes = computed(() => {
 
 <template>
   <li>
-    <button type="button" class="linha" :class="{ arquivada: pessoa.arquivada }" :aria-label="`Ver ${pessoa.nome}`" @click="emit('abrir')">
-      <span class="iniciais" aria-hidden="true">{{ iniciais }}</span>
+    <button type="button" class="linha" :aria-label="`Ver ${pessoa.nome}`" @click="emit('abrir')">
+      <IniciaisPessoa :nome="pessoa.nome" :apagada="pessoa.arquivada" />
       <span class="textos">
         <span class="nome">{{ pessoa.nome }}</span>
         <span class="detalhes">{{ detalhes }}</span>
@@ -75,25 +70,6 @@ li + li {
   align-items: center;
   gap: 12px;
   cursor: pointer;
-}
-
-.iniciais {
-  flex: none;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--marca-clara);
-  color: var(--marca-escura);
-  font-size: 13px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.arquivada .iniciais {
-  background: var(--divisoria);
-  color: var(--texto-suave);
 }
 
 .textos {

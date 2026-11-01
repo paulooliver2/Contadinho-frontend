@@ -23,9 +23,10 @@ import ResponsavelFolha from './ResponsavelFolha.vue'
  * importar o arquivo do banco (HU-06) ou digitar compra por compra (HU-47). Cada compra mostra de quem é (HU-08),
  * e o total vem dividido por responsável, com filtro (HU-10).
  */
-const props = defineProps<{ cartao: Cartao }>()
+/** `mesInicial`: a fatura a abrir, como a que o Início mostra; sem ele, a aberta. */
+const props = defineProps<{ cartao: Cartao; mesInicial?: string }>()
 
-const mes = ref(props.cartao.faturaAberta)
+const mes = ref(props.mesInicial ?? props.cartao.faturaAberta)
 const fatura = ref<Fatura | null>(null)
 const carregando = ref(false)
 const erroCarga = ref('')

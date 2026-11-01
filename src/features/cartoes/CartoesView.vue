@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { mensagemDeErro } from '@/api/erros'
 import BotaoAcao from '@/components/BotaoAcao.vue'
 import CabecalhoAba from '@/components/CabecalhoAba.vue'
@@ -13,7 +14,11 @@ import ResumoCartao from './ResumoCartao.vue'
 import SeletorCartoes from './SeletorCartoes.vue'
 
 const cartoes = useCartoes()
-const selecionadoId = ref<string | null>(null)
+// Vindo do card de fatura do Início: abre aquele cartão, naquela fatura.
+const route = useRoute()
+const doLink = (nome: string) => (typeof route.query[nome] === 'string' ? (route.query[nome] as string) : undefined)
+const selecionadoId = ref<string | null>(doLink('cartao') ?? null)
+const mesDoLink = doLink('fatura')
 const folhaAberta = ref(false)
 const aviso = ref('')
 const erroCarga = ref('')
@@ -64,7 +69,11 @@ function aoCadastrar(cartao: Cartao) {
       />
       <CaixaAviso v-if="aviso" tom="sucesso" fechavel :mensagem="aviso" @fechar="aviso = ''" />
       <ResumoCartao :cartao="selecionado" />
-      <FaturaCartao :key="selecionado.id" :cartao="selecionado" />
+      <FaturaCartao
+        :key="selecionado.id"
+        :cartao="selecionado"
+        :mes-inicial="selecionado.id === doLink('cartao') ? mesDoLink : undefined"
+      />
     </template>
 
     <NovoCartaoFolha v-model:aberta="folhaAberta" @cadastrado="aoCadastrar" />

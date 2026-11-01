@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import BarraDivisao from '@/components/BarraDivisao.vue'
 import { reais } from '@/lib/formatos'
 import { usePessoas } from '@/stores/pessoas'
 import type { Parte } from './faturas'
@@ -26,13 +27,6 @@ const linhas = computed(() =>
   })),
 )
 
-/** Estorno pode deixar uma parte negativa: ela aparece na lista, mas não ocupa espaço na barra. */
-const segmentos = computed(() => {
-  const positivas = linhas.value.filter((l) => l.total > 0)
-  const soma = positivas.reduce((s, l) => s + l.total, 0)
-  return positivas.map((l) => ({ ...l, fracao: l.total / soma }))
-})
-
 function alternar(chave: string) {
   filtro.value = filtro.value === chave ? null : chave
 }
@@ -40,9 +34,7 @@ function alternar(chave: string) {
 
 <template>
   <div class="divisao">
-    <div class="barra" aria-hidden="true">
-      <span v-for="s in segmentos" :key="s.chave" class="segmento" :style="{ flexGrow: s.fracao, background: s.cor }" />
-    </div>
+    <BarraDivisao :partes="linhas" />
     <ul class="partes" aria-label="Divisão da fatura">
       <li v-for="l in linhas" :key="l.chave">
         <button
@@ -68,29 +60,6 @@ function alternar(chave: string) {
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-
-.barra {
-  display: flex;
-  gap: 2px;
-  height: 8px;
-}
-
-.segmento {
-  flex-basis: 0;
-  min-width: 4px;
-}
-
-.segmento:first-child {
-  border-radius: 4px 0 0 4px;
-}
-
-.segmento:last-child {
-  border-radius: 0 4px 4px 0;
-}
-
-.segmento:only-child {
-  border-radius: 4px;
 }
 
 .partes {

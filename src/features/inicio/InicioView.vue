@@ -6,18 +6,42 @@ import CaixaAviso from '@/components/CaixaAviso.vue'
 import NavegadorMes from '@/components/NavegadorMes.vue'
 import { hojeIso } from '@/lib/formatos'
 import { useConta } from '@/stores/conta'
+import { usePessoas } from '@/stores/pessoas'
+import AReceberInicio from './AReceberInicio.vue'
+import FaturaAtual from './FaturaAtual.vue'
 import OrigemDespesas from './OrigemDespesas.vue'
+import ProximasContas from './ProximasContas.vue'
 import SaldoDoMes from './SaldoDoMes.vue'
-import { buscarResumoDoMes, type ResumoDoMes } from './resumo'
+import { buscarProximos, buscarResumoDoMes, type Proximos, type ResumoDoMes } from './resumo'
 
-/** Início (HU-23): o saldo do mês escolhido e de onde vêm as despesas. Próximas contas e A receber vêm na HU-24. */
+/**
+ * Início: o saldo do mês escolhido (HU-23) e, sempre de agora, as próximas contas, quem deve e a fatura atual de cada
+ * cartão (HU-24). Embaixo, de onde vêm as despesas do mês.
+ */
 const conta = useConta()
+const pessoas = usePessoas()
 const mes = ref(hojeIso().slice(0, 7))
 const resumo = ref<ResumoDoMes | null>(null)
 const carregando = ref(false)
 const erroCarga = ref('')
+const proximos = ref<Proximos | null>(null)
+const erroProximos = ref('')
 
-onMounted(() => conta.carregar().catch(() => {}))
+async function carregarProximos() {
+  erroProximos.value = ''
+  try {
+    // Os nomes de quem deve e da divisão vêm das pessoas.
+    const [lidos] = await Promise.all([buscarProximos(), pessoas.carregado ? null : pessoas.carregar()])
+    proximos.value = lidos
+  } catch (e) {
+    erroProximos.value = mensagemDeErro(e)
+  }
+}
+
+onMounted(() => {
+  conta.carregar().catch(() => {})
+  carregarProximos()
+})
 
 async function carregar() {
   erroCarga.value = ''
@@ -57,10 +81,21 @@ watch(mes, carregar, { immediate: true })
 
     <template v-else-if="resumo">
       <SaldoDoMes :resumo="resumo" :ocupado="carregando" />
-      <OrigemDespesas :resumo="resumo" />
     </template>
 
     <p v-else class="carregando" role="status">Carregando…</p>
+
+    <template v-if="erroProximos">
+      <CaixaAviso :mensagem="erroProximos" />
+      <BotaoAcao variante="secundario" @click="carregarProximos">Tentar de novo</BotaoAcao>
+    </template>
+    <template v-else-if="proximos">
+      <ProximasContas :contas="proximos.contas" />
+      <AReceberInicio :a-receber="proximos.aReceber" />
+      <FaturaAtual v-for="f in proximos.faturas" :key="f.cartaoId" :fatura="f" />
+    </template>
+
+    <OrigemDespesas v-if="resumo && !erroCarga" :resumo="resumo" />
   </div>
 </template>
 
