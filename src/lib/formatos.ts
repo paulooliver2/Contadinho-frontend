@@ -81,3 +81,9 @@ export function somarMeses(mes: string, quantos: number): string {
   const total = ano * 12 + (numero - 1) + quantos
   return `${Math.floor(total / 12)}-${String((total % 12) + 1).padStart(2, '0')}`
 }
+
+/** Dia do mês de 1 a 31 digitado num campo (RN-08); fora disso, null. */
+export function lerDia(texto: string): number | null {
+  const n = Number(texto)
+  return /^\d{1,2}$/.test(texto) && n >= 1 && n <= 31 ? n : null
+}

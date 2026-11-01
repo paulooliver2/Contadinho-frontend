@@ -132,6 +132,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/cartoes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["alterar_4"];
+        post?: never;
+        delete: operations["excluir_4"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/avisos/preferencias": {
         parameters: {
             query?: never;
@@ -366,6 +382,22 @@ export interface paths {
         get: operations["listar_1"];
         put?: never;
         post: operations["cadastrar_4"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/cartoes/{id}/encerramento": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["encerrar_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -750,7 +782,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete: operations["excluir_4"];
+        delete: operations["excluir_5"];
         options?: never;
         head?: never;
         patch?: never;
@@ -933,6 +965,28 @@ export interface components {
             tipo: "CPF" | "EMAIL" | "CELULAR" | "ALEATORIA";
             chave: string;
         };
+        EdicaoCartaoPedido: {
+            apelido?: string;
+            /** Format: int32 */
+            diaFechamento: number;
+            /** Format: int32 */
+            diaVencimento: number;
+        };
+        CartaoResposta: {
+            /** Format: uuid */
+            id: string;
+            apelido: string;
+            /** @enum {string} */
+            banco: "NUBANK" | "ITAU" | "BRADESCO" | "BANCO_DO_BRASIL" | "CAIXA" | "SANTANDER" | "INTER" | "C6" | "BTG" | "MERCADO_PAGO" | "OUTRO";
+            bancoNome: string;
+            ultimos4: string;
+            /** Format: int32 */
+            diaFechamento: number;
+            /** Format: int32 */
+            diaVencimento: number;
+            faturaAberta: string;
+            podeExcluir: boolean;
+        };
         PreferenciasPedido: {
             contaAtivo: boolean;
             /** Format: int32 */
@@ -1033,20 +1087,6 @@ export interface components {
             diaFechamento: number;
             /** Format: int32 */
             diaVencimento: number;
-        };
-        CartaoResposta: {
-            /** Format: uuid */
-            id: string;
-            apelido: string;
-            /** @enum {string} */
-            banco: "NUBANK" | "ITAU" | "BRADESCO" | "BANCO_DO_BRASIL" | "CAIXA" | "SANTANDER" | "INTER" | "C6" | "BTG" | "MERCADO_PAGO" | "OUTRO";
-            bancoNome: string;
-            ultimos4: string;
-            /** Format: int32 */
-            diaFechamento: number;
-            /** Format: int32 */
-            diaVencimento: number;
-            faturaAberta: string;
         };
         ConfirmacaoPedido: {
             nomeArquivo: string;
@@ -1675,6 +1715,52 @@ export interface operations {
             };
         };
     };
+    alterar_4: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EdicaoCartaoPedido"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CartaoResposta"];
+                };
+            };
+        };
+    };
+    excluir_4: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     preferencias: {
         parameters: {
             query?: never;
@@ -2134,6 +2220,26 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["CartaoResposta"];
                 };
+            };
+        };
+    };
+    encerrar_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2649,7 +2755,7 @@ export interface operations {
             };
         };
     };
-    excluir_4: {
+    excluir_5: {
         parameters: {
             query?: never;
             header?: never;

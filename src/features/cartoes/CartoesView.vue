@@ -9,6 +9,7 @@ import EstadoVazio from '@/components/EstadoVazio.vue'
 import IconeCartao from '@/components/IconeCartao.vue'
 import { useAvisos } from '@/stores/avisos'
 import { useCartoes, type Cartao } from '@/stores/cartoes'
+import EditarCartaoFolha from './EditarCartaoFolha.vue'
 import FaturaCartao from './FaturaCartao.vue'
 import NovoCartaoFolha from './NovoCartaoFolha.vue'
 import ResumoCartao from './ResumoCartao.vue'
@@ -21,6 +22,7 @@ const doLink = (nome: string) => (typeof route.query[nome] === 'string' ? (route
 const selecionadoId = ref<string | null>(doLink('cartao') ?? null)
 const mesDoLink = doLink('fatura')
 const folhaAberta = ref(false)
+const edicaoAberta = ref(false)
 const aviso = ref('')
 const erroCarga = ref('')
 
@@ -45,6 +47,19 @@ function aoCadastrar(cartao: Cartao) {
   avisos.atualizar()
   selecionadoId.value = cartao.id
   aviso.value = `${cartao.apelido} •• ${cartao.ultimos4} cadastrado.`
+}
+
+/** HU-45: dias novos mudam o fechamento e o vencimento das próximas faturas, e os avisos delas (HU-27). */
+function aoEditar(mensagem: string) {
+  avisos.atualizar()
+  aviso.value = mensagem
+}
+
+/** Encerrado ou excluído, sai da lista; a tela mostra o próximo cartão. */
+function aoRemover(mensagem: string) {
+  avisos.atualizar()
+  selecionadoId.value = null
+  aviso.value = mensagem
 }
 </script>
 
@@ -74,12 +89,13 @@ function aoCadastrar(cartao: Cartao) {
         @adicionar="folhaAberta = true"
       />
       <CaixaAviso v-if="aviso" tom="sucesso" fechavel :mensagem="aviso" @fechar="aviso = ''" />
-      <ResumoCartao :cartao="selecionado" />
+      <ResumoCartao :cartao="selecionado" @editar="edicaoAberta = true" />
       <FaturaCartao
-        :key="selecionado.id"
+        :key="`${selecionado.id}:${selecionado.diaFechamento}:${selecionado.diaVencimento}`"
         :cartao="selecionado"
         :mes-inicial="selecionado.id === doLink('cartao') ? mesDoLink : undefined"
       />
+      <EditarCartaoFolha v-model:aberta="edicaoAberta" :cartao="selecionado" @salvo="aoEditar" @removido="aoRemover" />
     </template>
 
     <NovoCartaoFolha v-model:aberta="folhaAberta" @cadastrado="aoCadastrar" />

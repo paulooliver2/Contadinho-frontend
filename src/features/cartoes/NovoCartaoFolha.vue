@@ -10,7 +10,9 @@ import FormularioEmpilhado from '@/components/FormularioEmpilhado.vue'
 import LinhaCampos from '@/components/LinhaCampos.vue'
 import TextoAjuda from '@/components/TextoAjuda.vue'
 import { useErrosDeCampos } from '@/lib/errosDeCampos'
+import { lerDia } from '@/lib/formatos'
 import { useCartoes, type Banco, type Cartao } from '@/stores/cartoes'
+import DiasCartao from './DiasCartao.vue'
 
 const aberta = defineModel<boolean>('aberta', { required: true })
 const emit = defineEmits<{ cadastrado: [cartao: Cartao] }>()
@@ -47,18 +49,13 @@ const notaModelo = computed(() => {
   return null
 })
 
-function dia(texto: string): number | null {
-  const n = Number(texto)
-  return /^\d{1,2}$/.test(texto) && n >= 1 && n <= 31 ? n : null
-}
-
 /** As mesmas regras do servidor (RN-07, RN-08), para avisar antes de enviar. */
 function conferir(): boolean {
   const novos: Record<string, string> = {}
   if (!banco.value) novos.banco = 'Escolha o banco.'
   if (!/^\d{4}$/.test(ultimos4.value)) novos.ultimos4 = 'Informe os 4 últimos dígitos.'
-  if (dia(fechamento.value) === null) novos.diaFechamento = 'Use um dia entre 1 e 31.'
-  if (dia(vencimento.value) === null) novos.diaVencimento = 'Use um dia entre 1 e 31.'
+  if (lerDia(fechamento.value) === null) novos.diaFechamento = 'Use um dia entre 1 e 31.'
+  if (lerDia(vencimento.value) === null) novos.diaVencimento = 'Use um dia entre 1 e 31.'
   erros.value = novos
   return Object.keys(novos).length === 0
 }
@@ -73,8 +70,8 @@ async function salvar() {
       banco: banco.value!,
       apelido: apelido.value.trim() || undefined,
       ultimos4: ultimos4.value,
-      diaFechamento: dia(fechamento.value)!,
-      diaVencimento: dia(vencimento.value)!,
+      diaFechamento: lerDia(fechamento.value)!,
+      diaVencimento: lerDia(vencimento.value)!,
     })
     emit('cadastrado', cartao)
     aberta.value = false
@@ -99,10 +96,12 @@ async function salvar() {
         <CampoTexto v-model="ultimos4" rotulo="Final" placeholder="0000" numerico :maxlength="4" autocomplete="off" :erro="erros.ultimos4" />
       </LinhaCampos>
 
-      <LinhaCampos>
-        <CampoTexto v-model="fechamento" rotulo="Dia do fechamento" placeholder="Ex.: 5" numerico :maxlength="2" autocomplete="off" :erro="erros.diaFechamento" />
-        <CampoTexto v-model="vencimento" rotulo="Dia do vencimento" placeholder="Ex.: 15" numerico :maxlength="2" autocomplete="off" :erro="erros.diaVencimento" />
-      </LinhaCampos>
+      <DiasCartao
+        v-model:fechamento="fechamento"
+        v-model:vencimento="vencimento"
+        :erro-fechamento="erros.diaFechamento"
+        :erro-vencimento="erros.diaVencimento"
+      />
 
       <TextoAjuda>O app nunca pede o número completo do cartão nem o código de segurança.</TextoAjuda>
 
