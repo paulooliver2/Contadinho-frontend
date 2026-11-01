@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { mensagemDeErro } from '@/api/erros'
 import AbasSegmentadas from '@/components/AbasSegmentadas.vue'
 import BotaoAcao from '@/components/BotaoAcao.vue'
+import BotaoNovo from '@/components/BotaoNovo.vue'
 import CabecalhoAba from '@/components/CabecalhoAba.vue'
 import CaixaAviso from '@/components/CaixaAviso.vue'
 import CartaoResumo from '@/components/CartaoResumo.vue'
@@ -131,12 +132,7 @@ function aoSalvarGasto(mensagem: string) {
   <div class="tela">
     <CabecalhoAba titulo="Gastos">
       <template #acoes>
-        <button type="button" class="novo" @click="novoGasto">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-          Novo gasto
-        </button>
+        <BotaoNovo texto="Novo gasto" @click="novoGasto" />
       </template>
     </CabecalhoAba>
     <NavegadorMes v-model="mes" rotulo="Mês dos gastos" />
@@ -238,22 +234,6 @@ function aoSalvarGasto(mensagem: string) {
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.novo {
-  min-height: var(--toque-minimo);
-  padding: 0 18px;
-  border: none;
-  border-radius: 24px;
-  background: var(--marca);
-  color: #FFFFFF;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
 }
 
 .totais {

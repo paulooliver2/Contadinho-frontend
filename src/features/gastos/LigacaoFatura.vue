@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { mensagemDeErro } from '@/api/erros'
 import BotaoAcao from '@/components/BotaoAcao.vue'
 import CaixaAviso from '@/components/CaixaAviso.vue'
+import LinhaValor from '@/components/LinhaValor.vue'
 import TextoAjuda from '@/components/TextoAjuda.vue'
 import { diaMes, mesPorExtenso, reais } from '@/lib/formatos'
 import { buscarCandidatas, desligarDaFatura, ligarAFatura, type CompraDaFatura, type ContaDoMes } from './gastos'
@@ -78,9 +79,7 @@ function desligar() {
 <template>
   <div class="ligacao">
     <template v-if="compra">
-      <p class="destaque">
-        <span>Na fatura de {{ fatura }}</span><span class="numero">{{ reais(compra.valor) }}</span>
-      </p>
+      <LinhaValor :rotulo="`Na fatura de ${fatura}`" :valor="reais(compra.valor)" />
       <p class="compra">{{ compra.descricao }} · {{ diaMes(compra.data) }}{{ parcela(compra) }} · {{ compra.cartao }}</p>
       <TextoAjuda>
         O total do mês soma a compra da fatura, nunca a conta fixa.
@@ -93,9 +92,7 @@ function desligar() {
     </template>
 
     <template v-else>
-      <p class="destaque">
-        <span>Aguardando fatura</span><span class="numero">{{ reais(item.valor) }}</span>
-      </p>
+      <LinhaValor rotulo="Aguardando fatura" :valor="reais(item.valor)" />
       <TextoAjuda>
         Ao importar a fatura{{ cartao ? ` do ${cartao}` : '' }}, o app liga sozinho a compra de valor parecido (até R$ 1
         de diferença) em até 5 dias do vencimento, {{ diaMes(item.vencimento) }}.
@@ -128,14 +125,6 @@ function desligar() {
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.destaque {
-  margin: 0;
-  display: flex;
-  justify-content: space-between;
-  font-size: 15px;
-  font-weight: 600;
 }
 
 .compra {

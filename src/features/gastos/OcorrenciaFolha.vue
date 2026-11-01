@@ -7,6 +7,8 @@ import CampoTexto from '@/components/CampoTexto.vue'
 import FolhaInferior from '@/components/FolhaInferior.vue'
 import FormularioEmpilhado from '@/components/FormularioEmpilhado.vue'
 import LinhaCampos from '@/components/LinhaCampos.vue'
+import LinhaValor from '@/components/LinhaValor.vue'
+import QuadroResumo from '@/components/QuadroResumo.vue'
 import TextoAjuda from '@/components/TextoAjuda.vue'
 import { useErrosDeCampos } from '@/lib/errosDeCampos'
 import { diaMes, hojeIso, lerValor, mesPorExtenso, reais, valorParaCampo } from '@/lib/formatos'
@@ -118,18 +120,13 @@ function desfazer() {
     <template v-if="item">
       <p class="subtitulo">Conta fixa · {{ situacao }}</p>
 
-      <section class="cadastro" aria-label="Cadastro da conta fixa">
-        <span class="rotulo">Cadastro da conta fixa</span>
-        <span class="resumo">{{ cadastro }}</span>
-      </section>
+      <QuadroResumo class="cadastro" rotulo="Cadastro da conta fixa" :texto="cadastro" />
 
       <FormularioEmpilhado @enviar="pagar">
         <LigacaoFatura v-if="noCartao" :item="item" :cartao="cartao" @salvo="ligou" />
 
         <template v-else-if="item.status === 'PAGA'">
-          <p class="destaque">
-            <span>Paga em {{ diaMes(item.pagoEm!) }}</span><span class="numero">{{ reais(item.valor) }}</span>
-          </p>
+          <LinhaValor :rotulo="`Paga em ${diaMes(item.pagoEm!)}`" :valor="reais(item.valor)" />
           <TextoAjuda v-if="item.valorPago !== item.valorPrevisto">
             O previsto era {{ reais(item.valorPrevisto) }}; o total do mês usa o que foi pago.
           </TextoAjuda>
@@ -167,32 +164,5 @@ function desfazer() {
 
 .cadastro {
   margin-bottom: 16px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: var(--fundo);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.rotulo {
-  font-size: 12px;
-  color: var(--rotulo);
-}
-
-.resumo {
-  font-size: 14px;
-}
-
-.destaque {
-  margin: 0;
-  display: flex;
-  justify-content: space-between;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.numero {
-  font-family: var(--fonte-numeros);
 }
 </style>

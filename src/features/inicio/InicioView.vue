@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import BotaoAcao from '@/components/BotaoAcao.vue'
 import EmConstrucao from '@/components/EmConstrucao.vue'
 import { useConta } from '@/stores/conta'
 
@@ -18,6 +19,7 @@ onMounted(() => conta.carregar().catch(() => {}))
       </svg>
     </RouterLink>
   </header>
+  <BotaoAcao variante="secundario" :para="{ name: 'receitas' }">Receitas do mês</BotaoAcao>
   <EmConstrucao titulo="Início" hus="HU-23 e HU-24" />
 </template>
 

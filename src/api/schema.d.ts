@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/api/pessoas/{id}": {
+    "/api/receitas/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -20,6 +20,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/pessoas/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["alterar_1"];
+        post?: never;
+        delete: operations["excluir_1"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/lancamentos/{id}": {
         parameters: {
             query?: never;
@@ -30,7 +46,7 @@ export interface paths {
         get?: never;
         put: operations["corrigir"];
         post?: never;
-        delete: operations["excluir_1"];
+        delete: operations["excluir_2"];
         options?: never;
         head?: never;
         patch?: never;
@@ -60,9 +76,9 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put: operations["alterar_1"];
+        put: operations["alterar_2"];
         post?: never;
-        delete: operations["excluir_2"];
+        delete: operations["excluir_3"];
         options?: never;
         head?: never;
         patch?: never;
@@ -76,7 +92,7 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put: operations["alterar_2"];
+        put: operations["alterar_3"];
         post?: never;
         delete?: never;
         options?: never;
@@ -111,6 +127,54 @@ export interface paths {
         put: operations["definirPix"];
         post?: never;
         delete: operations["removerPix"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/receitas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["cadastrar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/receitas/{id}/encerrar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["encerrar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/receitas/ocorrencias/{id}/confirmacao": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["confirmar"];
+        delete: operations["desfazer"];
         options?: never;
         head?: never;
         patch?: never;
@@ -173,7 +237,7 @@ export interface paths {
         };
         get: operations["listar"];
         put?: never;
-        post: operations["cadastrar"];
+        post: operations["cadastrar_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -221,7 +285,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["cadastrar_1"];
+        post: operations["cadastrar_2"];
         delete?: never;
         options?: never;
         head?: never;
@@ -237,7 +301,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["cadastrar_2"];
+        post: operations["cadastrar_3"];
         delete?: never;
         options?: never;
         head?: never;
@@ -253,7 +317,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["encerrar"];
+        post: operations["encerrar_1"];
         delete?: never;
         options?: never;
         head?: never;
@@ -285,7 +349,7 @@ export interface paths {
         };
         get: operations["listar_1"];
         put?: never;
-        post: operations["cadastrar_3"];
+        post: operations["cadastrar_4"];
         delete?: never;
         options?: never;
         head?: never;
@@ -429,7 +493,23 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["cadastrar_4"];
+        post: operations["cadastrar_5"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/receitas/mes/{mes}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["doMes"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -475,7 +555,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["doMes"];
+        get: operations["doMes_1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -507,7 +587,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["doMes_1"];
+        get: operations["doMes_2"];
         put?: never;
         post?: never;
         delete?: never;
@@ -590,7 +670,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete: operations["desfazer"];
+        delete: operations["desfazer_1"];
         options?: never;
         head?: never;
         patch?: never;
@@ -606,7 +686,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete: operations["excluir_3"];
+        delete: operations["excluir_4"];
         options?: never;
         head?: never;
         patch?: never;
@@ -616,6 +696,25 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        ReceitaPedido: {
+            descricao: string;
+            valor: number;
+            /** Format: date */
+            data?: string;
+            recorrente: boolean;
+        };
+        ReceitaResposta: {
+            /** Format: uuid */
+            id: string;
+            descricao: string;
+            valor: number;
+            recorrente: boolean;
+            /** Format: int32 */
+            dia: number;
+            primeiroMes: string;
+            /** Format: date */
+            encerradaEm?: string;
+        };
         PessoaPedido: {
             nome: string;
             apelido?: string;
@@ -769,6 +868,21 @@ export interface components {
             /** @enum {string} */
             tipo: "CPF" | "EMAIL" | "CELULAR" | "ALEATORIA";
             chave: string;
+        };
+        ConfirmacaoReceitaPedido: {
+            valorRecebido?: number;
+        };
+        OcorrenciaReceitaResposta: {
+            /** Format: uuid */
+            id: string;
+            receita: components["schemas"]["ReceitaResposta"];
+            /** Format: date */
+            data: string;
+            valor: number;
+            valorPrevisto: number;
+            valorRecebido?: number;
+            /** @enum {string} */
+            status: "PREVISTA" | "A_CONFIRMAR" | "RECEBIDA";
         };
         PagamentoPedido: {
             valor: number;
@@ -933,6 +1047,12 @@ export interface components {
             email: string;
             senha: string;
         };
+        ReceitasDoMesResposta: {
+            total: number;
+            recebido: number;
+            previsto: number;
+            receitas: components["schemas"]["OcorrenciaReceitaResposta"][];
+        };
         ResumoResposta: {
             aReceber: number;
             recebido: number;
@@ -1058,6 +1178,52 @@ export interface operations {
         };
         requestBody: {
             content: {
+                "application/json": components["schemas"]["ReceitaPedido"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceitaResposta"];
+                };
+            };
+        };
+    };
+    excluir: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    alterar_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
                 "application/json": components["schemas"]["PessoaPedido"];
             };
         };
@@ -1073,7 +1239,7 @@ export interface operations {
             };
         };
     };
-    excluir: {
+    excluir_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -1119,7 +1285,7 @@ export interface operations {
             };
         };
     };
-    excluir_1: {
+    excluir_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -1165,7 +1331,7 @@ export interface operations {
             };
         };
     };
-    alterar_1: {
+    alterar_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -1191,7 +1357,7 @@ export interface operations {
             };
         };
     };
-    excluir_2: {
+    excluir_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -1211,7 +1377,7 @@ export interface operations {
             };
         };
     };
-    alterar_2: {
+    alterar_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -1327,6 +1493,100 @@ export interface operations {
             };
         };
     };
+    cadastrar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReceitaPedido"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceitaResposta"];
+                };
+            };
+        };
+    };
+    encerrar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceitaResposta"];
+                };
+            };
+        };
+    };
+    confirmar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmacaoReceitaPedido"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OcorrenciaReceitaResposta"];
+                };
+            };
+        };
+    };
+    desfazer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OcorrenciaReceitaResposta"];
+                };
+            };
+        };
+    };
     registrar: {
         parameters: {
             query?: never;
@@ -1421,7 +1681,7 @@ export interface operations {
             };
         };
     };
-    cadastrar: {
+    cadastrar_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -1489,7 +1749,7 @@ export interface operations {
             };
         };
     };
-    cadastrar_1: {
+    cadastrar_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -1513,7 +1773,7 @@ export interface operations {
             };
         };
     };
-    cadastrar_2: {
+    cadastrar_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -1537,7 +1797,7 @@ export interface operations {
             };
         };
     };
-    encerrar: {
+    encerrar_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -1627,7 +1887,7 @@ export interface operations {
             };
         };
     };
-    cadastrar_3: {
+    cadastrar_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -1844,7 +2104,7 @@ export interface operations {
             };
         };
     };
-    cadastrar_4: {
+    cadastrar_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -1864,6 +2124,28 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Tokens"];
+                };
+            };
+        };
+    };
+    doMes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                mes: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReceitasDoMesResposta"];
                 };
             };
         };
@@ -1910,7 +2192,7 @@ export interface operations {
             };
         };
     };
-    doMes: {
+    doMes_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -1954,7 +2236,7 @@ export interface operations {
             };
         };
     };
-    doMes_1: {
+    doMes_2: {
         parameters: {
             query?: never;
             header?: never;
@@ -2059,7 +2341,7 @@ export interface operations {
             };
         };
     };
-    desfazer: {
+    desfazer_1: {
         parameters: {
             query?: never;
             header?: never;
@@ -2079,7 +2361,7 @@ export interface operations {
             };
         };
     };
-    excluir_3: {
+    excluir_4: {
         parameters: {
             query?: never;
             header?: never;
