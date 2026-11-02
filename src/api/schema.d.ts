@@ -628,6 +628,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/importacoes/{id}/desfazer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["previaDesfazer"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/gastos/mes/{mes}": {
         parameters: {
             query?: never;
@@ -783,6 +799,22 @@ export interface paths {
         put?: never;
         post?: never;
         delete: operations["excluir_5"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/importacoes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["desfazer_2"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1311,6 +1343,24 @@ export interface components {
             vencimento?: string;
             emAberto: number;
         };
+        DesfazerResposta: {
+            /** Format: uuid */
+            id: string;
+            nomeArquivo: string;
+            /** Format: date-time */
+            importadaEm: string;
+            mes: string;
+            /** Format: int32 */
+            removidas: number;
+            /** Format: int32 */
+            voltamADigitadas: number;
+            pagos: components["schemas"]["PagoResposta"][];
+        };
+        PagoResposta: {
+            /** Format: uuid */
+            pessoaId: string;
+            valor: number;
+        };
         GastosDoMesResposta: {
             total: number;
             noCartao: number;
@@ -1347,6 +1397,17 @@ export interface components {
             total: number;
             partes: components["schemas"]["ParteResposta"][];
             lancamentos: components["schemas"]["LancamentoResposta"][];
+            importacoes: components["schemas"]["ImportacaoDaFatura"][];
+        };
+        ImportacaoDaFatura: {
+            /** Format: uuid */
+            id: string;
+            nomeArquivo: string;
+            formato: string;
+            /** Format: date-time */
+            importadaEm: string;
+            /** Format: int32 */
+            compras: number;
         };
         ParteResposta: {
             /** Format: uuid */
@@ -2566,6 +2627,28 @@ export interface operations {
             };
         };
     };
+    previaDesfazer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DesfazerResposta"];
+                };
+            };
+        };
+    };
     doMes_2: {
         parameters: {
             query?: never;
@@ -2772,6 +2855,28 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    desfazer_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DesfazerResposta"];
+                };
             };
         };
     };

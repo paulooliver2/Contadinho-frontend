@@ -6,12 +6,28 @@ export type Fatura = components['schemas']['FaturaResposta']
 export type Lancamento = components['schemas']['LancamentoResposta']
 export type Compra = components['schemas']['CompraPedido']
 export type Parte = components['schemas']['ParteResposta']
+export type ImportacaoDaFatura = components['schemas']['ImportacaoDaFatura']
+export type DesfazerImportacao = components['schemas']['DesfazerResposta']
 
 /** A fatura de um mês de vencimento (RN-58). Sem compras, vem vazia com as datas calculadas. */
 export async function buscarFatura(cartaoId: string, mes: string): Promise<Fatura> {
   const { data, error, response } = await api.GET('/api/cartoes/{cartaoId}/faturas/{mes}', {
     params: { path: { cartaoId, mes } },
   })
+  if (!data) throw erroDaApi(error, response)
+  return data
+}
+
+/** HU-44: o que sai e o que volta, antes de confirmar. */
+export async function previaDesfazer(id: string): Promise<DesfazerImportacao> {
+  const { data, error, response } = await api.GET('/api/importacoes/{id}/desfazer', { params: { path: { id } } })
+  if (!data) throw erroDaApi(error, response)
+  return data
+}
+
+/** HU-44: tira da fatura as compras do arquivo; as digitadas que ele casou voltam a ser digitadas. */
+export async function desfazerImportacao(id: string): Promise<DesfazerImportacao> {
+  const { data, error, response } = await api.DELETE('/api/importacoes/{id}', { params: { path: { id } } })
   if (!data) throw erroDaApi(error, response)
   return data
 }

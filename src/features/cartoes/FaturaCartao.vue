@@ -13,8 +13,10 @@ import { useAvisos } from '@/stores/avisos'
 import type { Cartao } from '@/stores/cartoes'
 import { usePessoas } from '@/stores/pessoas'
 import CompraFolha from './CompraFolha.vue'
+import DesfazerImportacaoFolha from './DesfazerImportacaoFolha.vue'
 import DivisaoFatura from './DivisaoFatura.vue'
-import { buscarFatura, type Fatura, type Importacao, type Lancamento } from './faturas'
+import { buscarFatura, type Fatura, type Importacao, type ImportacaoDaFatura, type Lancamento } from './faturas'
+import ImportacoesFatura from './ImportacoesFatura.vue'
 import ImportarFolha from './ImportarFolha.vue'
 import LinhaLancamento from './LinhaLancamento.vue'
 import ResponsavelFolha from './ResponsavelFolha.vue'
@@ -22,7 +24,7 @@ import ResponsavelFolha from './ResponsavelFolha.vue'
 /**
  * A fatura do cartão, mês a mês, começando pela aberta (RN-58). As duas formas de registrar:
  * importar o arquivo do banco (HU-06) ou digitar compra por compra (HU-47). Cada compra mostra de quem é (HU-08),
- * e o total vem dividido por responsável, com filtro (HU-10).
+ * e o total vem dividido por responsável, com filtro (HU-10). Um arquivo importado pode ser desfeito (HU-44).
  */
 /** `mesInicial`: a fatura a abrir, como a que o Início mostra; sem ele, a aberta. */
 const props = defineProps<{ cartao: Cartao; mesInicial?: string }>()
@@ -40,6 +42,8 @@ const arquivo = ref<File | null>(null)
 const importarAberta = ref(false)
 const responsavelAberta = ref(false)
 const atribuindo = ref<Lancamento | null>(null)
+const desfazendo = ref<ImportacaoDaFatura | null>(null)
+const desfazerAberta = ref(false)
 /** HU-10: id da pessoa, DONO para as compras sem responsável, ou null para todas. */
 const filtro = ref<string | null>(null)
 
@@ -103,6 +107,11 @@ function novaCompra() {
 function corrigir(lancamento: Lancamento) {
   editando.value = lancamento
   folhaAberta.value = true
+}
+
+function desfazer(importacao: ImportacaoDaFatura) {
+  desfazendo.value = importacao
+  desfazerAberta.value = true
 }
 
 function escolheuArquivo(evento: Event) {
@@ -188,9 +197,12 @@ async function aoSalvar(mensagem: string) {
       <template #icone><IconeCartao :tamanho="28" /></template>
     </EstadoVazio>
 
+    <ImportacoesFatura v-if="fatura.importacoes.length > 0" :importacoes="fatura.importacoes" @desfazer="desfazer" />
+
     <ImportarFolha v-model:aberta="importarAberta" :cartao="cartao" :arquivo="arquivo" @importado="aoImportar" />
     <ResponsavelFolha v-model:aberta="responsavelAberta" :lancamento="atribuindo" @salvo="aoSalvar" />
     <CompraFolha v-model:aberta="folhaAberta" :cartao-id="cartao.id" :fatura="fatura" :editando="editando" @salvo="aoSalvar" />
+    <DesfazerImportacaoFolha v-model:aberta="desfazerAberta" :importacao="desfazendo" @desfeito="aoSalvar" />
   </template>
 
   <p v-else class="carregando" role="status">Carregando fatura…</p>
