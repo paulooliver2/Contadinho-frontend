@@ -882,6 +882,7 @@ export interface components {
             origem: "ARQUIVO" | "MANUAL";
             /** Format: uuid */
             pessoaId?: string;
+            sugerido: boolean;
         };
         ResponsavelPedido: {
             /** Format: uuid */
@@ -1162,6 +1163,8 @@ export interface components {
             finalCartao?: string;
             jaExiste: boolean;
             parecida?: components["schemas"]["ParecidaResposta"];
+            /** Format: uuid */
+            pessoaSugeridaId?: string;
         };
         ParecidaResposta: {
             /** Format: uuid */

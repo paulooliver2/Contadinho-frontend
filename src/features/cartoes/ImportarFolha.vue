@@ -10,18 +10,21 @@ import NavegadorMes from '@/components/NavegadorMes.vue'
 import TextoAjuda from '@/components/TextoAjuda.vue'
 import { reais } from '@/lib/formatos'
 import type { Cartao } from '@/stores/cartoes'
+import { usePessoas } from '@/stores/pessoas'
 import CompraParecida from './CompraParecida.vue'
 import { importarFatura, lerArquivo, previaImportacao, type ArquivoLido, type Importacao, type Previa } from './faturas'
 import LinhaLancamento from './LinhaLancamento.vue'
 
 /**
  * Importar a fatura em PDF ou OFX (HU-06, HU-39): prévia com a fatura de destino, os totais e as compras parecidas
- * com as digitadas, que o dono decide uma a uma (RN-59). PDF com senha pede a senha antes da prévia.
+ * com as digitadas, que o dono decide uma a uma (RN-59). PDF com senha pede a senha antes da prévia. As compras que
+ * foram da mesma pessoa nas últimas vezes já vêm com ela, marcadas como sugeridas (HU-09).
  */
 const props = defineProps<{ cartao: Cartao; arquivo: File | null }>()
 const aberta = defineModel<boolean>('aberta', { required: true })
 const emit = defineEmits<{ importado: [resultado: Importacao] }>()
 
+const pessoas = usePessoas()
 const lido = ref<ArquivoLido | null>(null)
 const previa = ref<Previa | null>(null)
 const mes = ref('')
@@ -93,6 +96,7 @@ function trocarFatura(novo: string) {
 
 const parecidas = computed(() => previa.value?.itens.filter((i) => i.parecida) ?? [])
 const novas = computed(() => previa.value?.itens.filter((i) => !i.jaExiste && !i.parecida) ?? [])
+const sugeridas = computed(() => novas.value.filter((i) => i.pessoaSugeridaId).length)
 const jaImportadas = computed(() => previa.value?.itens.filter((i) => i.jaExiste) ?? [])
 const faltaDecidir = computed(() => Object.values(decisoes.value).some((d) => d === null))
 
@@ -164,8 +168,17 @@ async function confirmar() {
 
         <template v-if="novas.length > 0">
           <h3>Entram na fatura</h3>
+          <TextoAjuda v-if="sugeridas > 0">
+            {{ sugeridas === 1 ? 'A compra marcada como sugerida já vai' : 'As compras marcadas como sugeridas já vão' }}
+            para quem ficou com ela nas duas últimas vezes. Dá para trocar depois, na fatura.
+          </TextoAjuda>
           <ul class="lista">
-            <LinhaLancamento v-for="item in novas" :key="item.idExterno" :item="item" />
+            <LinhaLancamento
+              v-for="item in novas"
+              :key="item.idExterno"
+              :item="item"
+              :selo="item.pessoaSugeridaId ? `${pessoas.rotulo(item.pessoaSugeridaId)} · sugerido` : undefined"
+            />
           </ul>
         </template>
 

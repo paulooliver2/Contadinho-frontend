@@ -185,6 +185,7 @@ async function aoSalvar(mensagem: string) {
         :selo="l.origem === 'MANUAL' ? 'digitada' : undefined"
         :clicavel="l.origem === 'MANUAL'"
         :responsavel="pessoas.carregado ? responsavel(l) : undefined"
+        :sugerido="l.sugerido"
         @abrir="corrigir(l)"
         @responsavel="trocarResponsavel(l)"
       />

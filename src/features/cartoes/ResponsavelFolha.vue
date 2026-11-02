@@ -12,7 +12,7 @@ import { atribuirResponsavel, type Lancamento } from './faturas'
 
 /**
  * HU-08: de quem é a compra, entre "Você" e as pessoas ativas. Numa parcela com outras pela frente, pergunta se as
- * próximas também são dessa pessoa (RN-17).
+ * próximas também são dessa pessoa (RN-17). A sugerida pelas últimas vezes (HU-09) pode ser confirmada como está.
  */
 const props = defineProps<{ lancamento: Lancamento | null }>()
 const aberta = defineModel<boolean>('aberta', { required: true })
@@ -90,6 +90,14 @@ async function salvar(proximas: boolean) {
       </p>
 
       <template v-if="!perguntandoProximas">
+        <template v-if="lancamento.sugerido && lancamento.pessoaId">
+          <TextoAjuda tom="aviso">
+            Sugerido: {{ pessoas.rotulo(lancamento.pessoaId) }} ficou com esta compra nas duas últimas vezes.
+          </TextoAjuda>
+          <BotaoAcao :carregando="enviando" texto-carregando="Salvando…" @click="salvar(false)">
+            Está certo, é de {{ pessoas.rotulo(lancamento.pessoaId) }}
+          </BotaoAcao>
+        </template>
         <ChipsEscolha :model-value="escolha" rotulo="Responsável" :opcoes="opcoes" @update:model-value="escolher" />
         <template v-if="pessoas.ativas.length === 0">
           <TextoAjuda>Ainda não há pessoas cadastradas. Cadastre em A receber quem usa seu cartão.</TextoAjuda>

@@ -15,9 +15,16 @@ export interface ItemDeFatura {
 
 /**
  * Uma compra da fatura. Com `clicavel`, vira botão (corrigir compra digitada, RN-60). Com `responsavel`, mostra de
- * quem é a compra num botão à direita (HU-08).
+ * quem é a compra num botão à direita (HU-08); `sugerido` marca o responsável que veio das últimas vezes, até o dono
+ * tocar nele (HU-09).
  */
-const props = defineProps<{ item: ItemDeFatura; selo?: string; clicavel?: boolean; responsavel?: string }>()
+const props = defineProps<{
+  item: ItemDeFatura
+  selo?: string
+  clicavel?: boolean
+  responsavel?: string
+  sugerido?: boolean
+}>()
 const emit = defineEmits<{ abrir: []; responsavel: [] }>()
 
 const detalhes = computed(() => {
@@ -45,6 +52,7 @@ const detalhes = computed(() => {
         <span class="detalhes">
           {{ detalhes }}
           <span v-if="selo" class="selo">{{ selo }}</span>
+          <span v-if="sugerido" class="selo sugerido">sugerido</span>
         </span>
       </span>
       <span class="valor" :class="{ estorno: item.valor < 0 }">{{ reais(item.valor) }}</span>
@@ -53,8 +61,8 @@ const detalhes = computed(() => {
       v-if="responsavel"
       type="button"
       class="responsavel"
-      :class="{ dono: responsavel === 'Você' }"
-      :aria-label="`De quem é ${item.descricao}: ${responsavel}. Trocar`"
+      :class="{ dono: responsavel === 'Você', sugerido }"
+      :aria-label="`De quem é ${item.descricao}: ${responsavel}${sugerido ? ', sugerido' : ''}. Trocar`"
       @click="emit('responsavel')"
     >
       {{ responsavel }}
@@ -93,6 +101,13 @@ li + li {
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
+}
+
+/* Sugerido: contorno tracejado, para pedir conferência sem parecer erro. */
+.responsavel.sugerido {
+  background: transparent;
+  outline: 1.5px dashed var(--marca);
+  outline-offset: -1.5px;
 }
 
 .responsavel.dono {
@@ -150,6 +165,11 @@ li + li {
   color: var(--info);
   font-size: 11px;
   font-weight: 600;
+}
+
+.selo.sugerido {
+  background: var(--aviso-claro);
+  color: var(--aviso);
 }
 
 .valor {
