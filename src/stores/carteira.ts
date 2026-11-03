@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
 import { api } from '@/api/client'
 import { erroDaApi } from '@/api/erros'
-import type { components } from '@/api/schema'
+import type { components, operations } from '@/api/schema'
 import { useSessao } from './sessao'
 
 export type Carteira = components['schemas']['Carteira']
@@ -13,6 +13,10 @@ export type NovoInvestimento = components['schemas']['NovoInvestimento']
 export type NovaMovimentacao = components['schemas']['NovaMovimentacao']
 export type CriptoEncontrada = components['schemas']['CriptoEncontrada']
 export type TipoInvestimento = PosicaoResumo['tipo']
+export type Evolucao = components['schemas']['EvolucaoResposta']
+export type Fatia = components['schemas']['FatiaResposta']
+export type Classe = Fatia['classe']
+export type Periodo = NonNullable<NonNullable<operations['evolucao']['parameters']['query']>['periodo']>
 
 /**
  * A carteira de investimentos (HU-30). O servidor calcula quantidade, preço médio e aplicado; a lista é recarregada
@@ -28,6 +32,12 @@ export const useCarteira = defineStore('carteira', () => {
   /** A atualização em andamento (com a da fila, se houver) e se outra foi pedida no meio dela. */
   let emAndamento: Promise<void> | null = null
   let pendente = false
+  /** HU-32: a evolução do período escolhido; só a resposta do último pedido vale. */
+  const periodo = ref<Periodo>('MES')
+  const evolucao = ref<Evolucao | null>(null)
+  /** O período da evolução que está na tela: o chip muda na hora, os números só quando a resposta chega. */
+  const periodoDaEvolucao = ref<Periodo>('MES')
+  let pedidoEvolucao = 0
 
   async function carregar() {
     const minha = geracao
@@ -39,8 +49,10 @@ export const useCarteira = defineStore('carteira', () => {
   /** Depois de salvar, a lista é atualizada sem segurar quem salvou: a falha aparece ao abrir a Carteira. */
   function recarregar() {
     // HU-31: o ativo novo já ganha cotação, sem esperar reabrir a tela.
+    // HU-32: e a evolução, para o aporte novo já aparecer no período.
     carregar()
       .then(() => atualizar())
+      .then(() => carregarEvolucao())
       .catch(() => {})
   }
 
@@ -116,6 +128,33 @@ export const useCarteira = defineStore('carteira', () => {
     return emAndamento
   }
 
+  /** HU-32: pede a evolução do período (ou do atual); trocar rápido descarta as respostas antigas. */
+  async function carregarEvolucao(novo?: Periodo) {
+    if (novo) periodo.value = novo
+    const doPedido = periodo.value
+    const minha = geracao
+    const pedido = ++pedidoEvolucao
+    const { data, error, response } = await api.GET('/api/investimentos/evolucao', {
+      params: { query: { periodo: doPedido } },
+    })
+    if (!data) throw erroDaApi(error, response)
+    if (minha === geracao && pedido === pedidoEvolucao) {
+      evolucao.value = data
+      periodoDaEvolucao.value = doPedido
+    }
+  }
+
+  /** HU-32: Ação/ETF ou FII; a carteira é recarregada para a distribuição mudar. */
+  async function alterarClasse(id: string, fii: boolean): Promise<PosicaoDetalhe> {
+    const { data, error, response } = await api.PATCH('/api/investimentos/{id}', {
+      params: { path: { id } },
+      body: { fii },
+    })
+    if (!data) throw erroDaApi(error, response)
+    recarregar()
+    return data
+  }
+
   async function buscarCripto(texto: string): Promise<CriptoEncontrada[]> {
     const { data, error, response } = await api.GET('/api/investimentos/cripto', { params: { query: { busca: texto } } })
     if (!data) throw erroDaApi(error, response)
@@ -134,8 +173,29 @@ export const useCarteira = defineStore('carteira', () => {
       atualizando.value = false
       emAndamento = null
       pendente = false
+      evolucao.value = null
+      periodo.value = 'MES'
+      periodoDaEvolucao.value = 'MES'
+      pedidoEvolucao++
     },
   )
 
-  return { carteira, atualizando, erroAtualizacao, atualizar, carregar, criar, detalhe, movimentar, excluirMovimentacao, excluir, buscarCripto }
+  return {
+    carteira,
+    atualizando,
+    erroAtualizacao,
+    periodo,
+    evolucao,
+    periodoDaEvolucao,
+    atualizar,
+    carregar,
+    carregarEvolucao,
+    criar,
+    detalhe,
+    movimentar,
+    excluirMovimentacao,
+    excluir,
+    alterarClasse,
+    buscarCripto,
+  }
 })

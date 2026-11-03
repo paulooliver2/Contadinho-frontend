@@ -94,6 +94,21 @@ async function excluirMovimentacao(movimentacaoId: string) {
   }
 }
 
+/** HU-32: Ação/ETF ou FII, para a distribuição por classe. */
+const trocandoClasse = ref(false)
+async function trocarClasse() {
+  if (!posicao.value || trocandoClasse.value) return
+  trocandoClasse.value = true
+  erroAcao.value = ''
+  try {
+    posicao.value = await loja.alterarClasse(posicao.value.id, !posicao.value.fii)
+  } catch (e) {
+    erroAcao.value = mensagemDeErro(e)
+  } finally {
+    trocandoClasse.value = false
+  }
+}
+
 async function excluirPosicao() {
   if (!posicao.value || excluindoPosicao.value) return
   if (!confirmandoExclusao.value) {
@@ -150,6 +165,12 @@ async function excluirPosicao() {
           <LinhaValor rotulo="Quantidade" :valor="quantidade(posicao, posicao.quantidade ?? 0)" />
           <LinhaValor v-if="posicao.precoMedio" rotulo="Preço médio" :valor="preco(posicao.precoMedio)" />
           <LinhaValor v-if="posicao.cotacao != null && !posicao.encerrada" rotulo="Cotação" :valor="preco(posicao.cotacao)" />
+          <template v-if="posicao.tipo === 'ACAO'">
+            <LinhaValor rotulo="Classe" :valor="posicao.fii ? 'FII' : 'Ação/ETF'" />
+            <button type="button" class="trocar" :disabled="trocandoClasse" @click="trocarClasse">
+              {{ posicao.fii ? 'Trocar para Ação/ETF' : 'Trocar para FII' }}
+            </button>
+          </template>
         </template>
       </section>
       <HoraCotacao :posicao="posicao" />
@@ -252,5 +273,18 @@ async function excluirPosicao() {
   font-size: 13px;
   color: var(--texto-suave);
   text-align: center;
+}
+.trocar {
+  display: block;
+  margin-left: auto;
+  min-height: var(--toque-minimo);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--marca);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
 }
 </style>

@@ -64,6 +64,12 @@ const indexadores: { valor: Indexador; rotulo: string }[] = [
 
 const tipo = ref<TipoInvestimento | null>(null)
 const ticker = ref('')
+/** HU-32: Ação/ETF ou FII, para a distribuição por classe. */
+const classe = ref<'ACAO' | 'FII' | null>('ACAO')
+const classes = [
+  { valor: 'ACAO', rotulo: 'Ação/ETF' },
+  { valor: 'FII', rotulo: 'FII' },
+] as const
 const cripto = ref<CriptoEncontrada | null>(null)
 const quantidade = ref('')
 const preco = ref('')
@@ -98,6 +104,7 @@ watch(aberta, (abriu) => {
   if (!abriu) return
   tipo.value = null
   ticker.value = ''
+  classe.value = 'ACAO'
   cripto.value = null
   quantidade.value = ''
   preco.value = ''
@@ -140,6 +147,7 @@ function montar(): NovoInvestimento | null {
     if (t === 'ACAO') {
       if (!ticker.value.trim()) novos.codigo = 'Informe o código, como PETR4.'
       pedido.codigo = ticker.value.trim()
+      pedido.fii = classe.value === 'FII'
     } else {
       if (!cripto.value) novos.codigo = 'Escolha a cripto na busca.'
       pedido.codigo = cripto.value?.id
@@ -201,6 +209,7 @@ async function salvar() {
 
       <template v-if="tipo === 'ACAO'">
         <CampoTexto v-model="ticker" rotulo="Código na B3" placeholder="Ex.: PETR4 ou BOVA11" :maxlength="12" autocomplete="off" :erro="erros.codigo" />
+        <ChipsEscolha v-model="classe" rotulo="Classe" :opcoes="classes" />
         <LinhaCampos>
           <CampoTexto v-model="quantidade" rotulo="Quantidade" numerico placeholder="100" :erro="erros.quantidade" />
           <CampoTexto v-model="preco" rotulo="Preço médio (R$)" decimal placeholder="30,00" :erro="erros.preco" />

@@ -1,5 +1,5 @@
 import { reais } from '@/lib/formatos'
-import type { PosicaoResumo, TipoInvestimento } from '@/stores/carteira'
+import type { Classe, Periodo, PosicaoResumo, TipoInvestimento } from '@/stores/carteira'
 
 /** Quantas casas cada tipo aceita na quantidade (HU-30): ação inteira, Tesouro 2, cripto 8. */
 export const CASAS_QUANTIDADE: Record<TipoInvestimento, number> = { ACAO: 0, TESOURO: 2, CRIPTO: 8, RENDA_FIXA: 2 }
@@ -88,4 +88,38 @@ export function quando(instante: string): { hoje: boolean; texto: string } {
   const hora = `${doisDigitos(d.getHours())}:${doisDigitos(d.getMinutes())}`
   const hoje = d.toDateString() === agora.toDateString()
   return { hoje, texto: hoje ? hora : `${doisDigitos(d.getDate())}/${doisDigitos(d.getMonth() + 1)} ${hora}` }
+}
+
+/** HU-32: as classes da distribuição, na ordem do servidor, com uma cor fixa cada. */
+export const ROTULOS_CLASSE: Record<Classe, string> = {
+  RENDA_FIXA: 'Renda fixa',
+  ACOES: 'Ações',
+  FIIS: 'FIIs',
+  CRIPTO: 'Cripto',
+}
+
+export const CORES_CLASSE: Record<Classe, string> = {
+  RENDA_FIXA: 'var(--serie-1)',
+  ACOES: 'var(--serie-2)',
+  FIIS: 'var(--serie-3)',
+  CRIPTO: 'var(--serie-4)',
+}
+
+export const PERIODOS: readonly { valor: Periodo; rotulo: string }[] = [
+  { valor: 'DIA', rotulo: 'Dia' },
+  { valor: 'MES', rotulo: 'Mês' },
+  { valor: 'SEIS_MESES', rotulo: '6 meses' },
+  { valor: 'DOZE_MESES', rotulo: '12 meses' },
+]
+
+/** "+0,90%", "−1,20%" ou "0,00%". */
+export function percentual(valor: number): string {
+  const sinal = valor > 0 ? '+' : valor < 0 ? '−' : ''
+  return `${sinal}${porcento.format(Math.abs(valor))}%`
+}
+
+/** "2026-11-03" vira "03/11". */
+export function diaMes(iso: string): string {
+  const [, mes, dia] = iso.split('-')
+  return `${dia}/${mes}`
 }

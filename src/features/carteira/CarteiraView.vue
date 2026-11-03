@@ -7,13 +7,17 @@ import BotaoNovo from '@/components/BotaoNovo.vue'
 import CabecalhoAba from '@/components/CabecalhoAba.vue'
 import CaixaAviso from '@/components/CaixaAviso.vue'
 import CartaoResumo from '@/components/CartaoResumo.vue'
+import ChipsEscolha from '@/components/ChipsEscolha.vue'
 import EstadoVazio from '@/components/EstadoVazio.vue'
 import { reais } from '@/lib/formatos'
-import { useCarteira, type PosicaoDetalhe, type PosicaoResumo, type TipoInvestimento } from '@/stores/carteira'
-import { ROTULOS_TIPO, titulo } from './formatos'
+import { useCarteira, type Periodo, type PosicaoDetalhe, type PosicaoResumo, type TipoInvestimento } from '@/stores/carteira'
+import DistribuicaoClasses from './DistribuicaoClasses.vue'
+import { PERIODOS, ROTULOS_TIPO, titulo } from './formatos'
+import GraficoEvolucao from './GraficoEvolucao.vue'
 import GanhoTexto from './GanhoTexto.vue'
 import LinhaPosicao from './LinhaPosicao.vue'
 import NovoInvestimentoFolha from './NovoInvestimentoFolha.vue'
+import RendimentoPeriodo from './RendimentoPeriodo.vue'
 
 /** HU-30: a carteira agrupada por tipo, com o total aplicado no topo e as encerradas recolhidas no fim. */
 const router = useRouter()
@@ -32,8 +36,30 @@ async function carregar() {
     erroCarga.value = mensagemDeErro(e)
     return
   }
-  loja.atualizar()
+  // HU-32: a evolução vem depois da atualização, para já sair com o preço de hoje.
+  loja
+    .atualizar()
+    .then(() => carregarEvolucao())
+    .catch(() => {})
 }
+
+const erroEvolucao = ref('')
+
+async function carregarEvolucao(novo?: Periodo) {
+  erroEvolucao.value = ''
+  try {
+    await loja.carregarEvolucao(novo)
+  } catch {
+    erroEvolucao.value = 'Não deu para carregar a evolução agora.'
+  }
+}
+
+const periodo = computed<Periodo | null>({
+  get: () => loja.periodo,
+  set: (novo) => {
+    if (novo) carregarEvolucao(novo)
+  },
+})
 
 onMounted(carregar)
 
@@ -98,6 +124,21 @@ function aoSalvar(p: PosicaoDetalhe) {
           </p>
         </CartaoResumo>
 
+        <section class="cartao" aria-label="Evolução da carteira">
+          <ChipsEscolha v-model="periodo" rotulo="Período" :opcoes="PERIODOS" />
+          <template v-if="loja.evolucao">
+            <RendimentoPeriodo :evolucao="loja.evolucao" :periodo="loja.periodoDaEvolucao" />
+            <GraficoEvolucao :pontos="loja.evolucao.pontos" />
+          </template>
+          <p v-else-if="erroEvolucao" class="nota" role="status">{{ erroEvolucao }}</p>
+          <p v-else class="nota" role="status">Carregando…</p>
+        </section>
+
+        <section v-if="loja.carteira.distribuicao.length > 0" class="cartao" aria-label="Distribuição da carteira">
+          <h2 class="secao">Distribuição</h2>
+          <DistribuicaoClasses :fatias="loja.carteira.distribuicao" />
+        </section>
+
         <section v-for="g in grupos" :key="g.tipo" class="grupo" :aria-labelledby="`grupo-${g.tipo}`">
           <h2 :id="`grupo-${g.tipo}`" class="secao">{{ g.rotulo }}</h2>
           <ul class="lista">
@@ -145,6 +186,25 @@ function aoSalvar(p: PosicaoDetalhe) {
 
 .status {
   margin: 4px 0 0;
+}
+
+.cartao {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border-radius: var(--raio-card);
+  background: var(--superficie);
+}
+
+.cartao .secao {
+  margin: 0;
+}
+
+.nota {
+  margin: 0;
+  font-size: 13px;
+  color: var(--texto-suave);
 }
 
 .grupo {

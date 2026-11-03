@@ -628,6 +628,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/investimentos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["detalhe"];
+        put?: never;
+        post?: never;
+        delete: operations["excluir_5"];
+        options?: never;
+        head?: never;
+        patch: operations["alterarClasse"];
+        trace?: never;
+    };
     "/api/resumo/proximos": {
         parameters: {
             query?: never;
@@ -708,17 +724,17 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/investimentos/{id}": {
+    "/api/investimentos/evolucao": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["detalhe"];
+        get: operations["evolucao"];
         put?: never;
         post?: never;
-        delete: operations["excluir_5"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -1277,6 +1293,7 @@ export interface components {
             dataAplicacao?: string;
             /** Format: date */
             vencimento?: string;
+            fii?: boolean;
         };
         MovimentacaoResposta: {
             /** Format: uuid */
@@ -1321,6 +1338,7 @@ export interface components {
             cdiAte?: string;
             desatualizado: boolean;
             resultado?: number;
+            fii: boolean;
             movimentacoes: components["schemas"]["MovimentacaoResposta"][];
         };
         NovaMovimentacao: {
@@ -1341,6 +1359,13 @@ export interface components {
             /** Format: int32 */
             semCotacao: number;
             posicoes: components["schemas"]["PosicaoResumo"][];
+            distribuicao: components["schemas"]["FatiaResposta"][];
+        };
+        FatiaResposta: {
+            /** @enum {string} */
+            classe: "RENDA_FIXA" | "ACOES" | "FIIS" | "CRIPTO";
+            valor: number;
+            percentual: number;
         };
         PosicaoResumo: {
             /** Format: uuid */
@@ -1373,6 +1398,7 @@ export interface components {
             cdiAte?: string;
             desatualizado: boolean;
             resultado?: number;
+            fii: boolean;
         };
         PagamentoContaPedido: {
             /** Format: date */
@@ -1495,6 +1521,9 @@ export interface components {
             /** Format: email */
             email: string;
             senha: string;
+        };
+        NovaClasse: {
+            fii: boolean;
         };
         AReceberDoInicioResposta: {
             total: number;
@@ -1627,6 +1656,28 @@ export interface components {
             /** Format: date */
             vencimento?: string;
             emAberto: number;
+        };
+        EvolucaoResposta: {
+            /** Format: date */
+            de: string;
+            /** Format: date */
+            ate: string;
+            desdeCadastro: boolean;
+            pontos: components["schemas"]["PontoResposta"][];
+            valorInicial: number;
+            valorFinal: number;
+            aportes: number;
+            resgates: number;
+            ganho: number;
+            ganhoPercentual?: number;
+            cdiPercentual?: number;
+            /** Format: date */
+            cdiAte?: string;
+        };
+        PontoResposta: {
+            /** Format: date */
+            data: string;
+            valor: number;
         };
         CriptoEncontrada: {
             id: string;
@@ -2982,6 +3033,74 @@ export interface operations {
             };
         };
     };
+    detalhe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PosicaoDetalhe"];
+                };
+            };
+        };
+    };
+    excluir_5: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    alterarClasse: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NovaClasse"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PosicaoDetalhe"];
+                };
+            };
+        };
+    };
     proximos: {
         parameters: {
             query?: never;
@@ -3088,13 +3207,13 @@ export interface operations {
             };
         };
     };
-    detalhe: {
+    evolucao: {
         parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
+            query?: {
+                periodo?: "DIA" | "MES" | "SEIS_MESES" | "DOZE_MESES";
             };
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -3105,28 +3224,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PosicaoDetalhe"];
+                    "application/json": components["schemas"]["EvolucaoResposta"];
                 };
-            };
-        };
-    };
-    excluir_5: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No Content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
