@@ -132,6 +132,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/conta/modelo-cobranca": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["definirModelo"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/cartoes/{id}": {
         parameters: {
             query?: never;
@@ -1030,6 +1046,12 @@ export interface components {
             tipo: "CPF" | "EMAIL" | "CELULAR" | "ALEATORIA";
             chave: string;
         };
+        ModeloPedido: {
+            modelo?: string;
+        };
+        ModeloResposta: {
+            modelo?: string;
+        };
         EdicaoCartaoPedido: {
             apelido?: string;
             /** Format: int32 */
@@ -1428,6 +1450,7 @@ export interface components {
             nome: string;
             email: string;
             pix?: components["schemas"]["Pix"];
+            modeloCobranca?: string;
         };
         CategoriaResposta: {
             /** Format: uuid */
@@ -1827,6 +1850,30 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    definirModelo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ModeloPedido"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModeloResposta"];
+                };
             };
         };
     };

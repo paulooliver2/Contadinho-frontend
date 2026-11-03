@@ -9,6 +9,7 @@ import ChavePixForm from '@/features/conta/ChavePixForm.vue'
 import { formatarWhatsapp } from '@/lib/telefone'
 import { useConta } from '@/stores/conta'
 import type { Pessoa } from '@/stores/pessoas'
+import BalaoMensagem from './BalaoMensagem.vue'
 import { linkWhatsapp, mensagemDeCobranca, registrarCobranca } from './cobranca'
 import type { Historico } from './receber'
 
@@ -41,7 +42,7 @@ watch(aberta, async (abriu) => {
 
 const nome = computed(() => props.pessoa.apelido ?? props.pessoa.nome.split(' ')[0]!)
 const pix = computed(() => conta.conta?.pix ?? null)
-const mensagem = computed(() => (pix.value ? mensagemDeCobranca(nome.value, props.historico, pix.value) : ''))
+const mensagem = computed(() => (pix.value ? mensagemDeCobranca(nome.value, props.historico, pix.value, conta.conta?.modeloCobranca) : ''))
 
 async function abrirWhatsapp() {
   const numero = props.pessoa.whatsapp
@@ -75,7 +76,7 @@ async function abrirWhatsapp() {
       </template>
 
       <template v-else-if="pix">
-        <p class="balao" aria-label="Prévia da mensagem">{{ mensagem }}</p>
+        <BalaoMensagem :texto="mensagem" rotulo="Prévia da mensagem" />
         <TextoAjuda>
           O WhatsApp abre nessa conversa com o texto pronto. Você confere e toca em enviar. A chave Pix vem das suas
           configurações.
@@ -107,14 +108,4 @@ async function abrirWhatsapp() {
   font-weight: 600;
 }
 
-.balao {
-  margin: 0 0 0 32px;
-  padding: 12px 14px;
-  border-radius: 14px 14px 4px 14px;
-  background: var(--marca-clara);
-  color: var(--texto);
-  font-size: 14px;
-  line-height: 1.45;
-  white-space: pre-line;
-}
 </style>

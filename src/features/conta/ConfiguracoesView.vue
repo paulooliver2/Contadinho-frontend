@@ -10,8 +10,12 @@ import { useAvisos } from '@/stores/avisos'
 import { useConta } from '@/stores/conta'
 import { useSessao } from '@/stores/sessao'
 import ChavePixForm from './ChavePixForm.vue'
+import ModeloCobrancaForm from './ModeloCobrancaForm.vue'
 
-/** Configurações: quem está logado, a chave Pix das cobranças (HU-03), os avisos (Épico 6) e Sair. */
+/**
+ * Configurações: quem está logado, a chave Pix e o modelo da mensagem das cobranças (HU-03, HU-21), os avisos
+ * (Épico 6) e Sair.
+ */
 const router = useRouter()
 const conta = useConta()
 const sessao = useSessao()
@@ -97,6 +101,11 @@ async function sair() {
         <button v-if="conta.conta.pix" type="button" class="remover" :disabled="removendo" @click="removerPix">
           {{ removendo ? 'Removendo…' : 'Remover chave' }}
         </button>
+      </section>
+      <section class="cartao" aria-labelledby="titulo-modelo">
+        <h3 id="titulo-modelo">Mensagem de cobrança</h3>
+        <p class="ajuda">O texto que vai no WhatsApp. Escreva do seu jeito e use as variáveis para o que muda.</p>
+        <ModeloCobrancaForm />
       </section>
 
       <h2>Avisos</h2>
