@@ -452,6 +452,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/cartoes/{cartaoId}/adicionais": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["listar_2"];
+        put?: never;
+        post: operations["cadastrar_5"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/sair": {
         parameters: {
             query?: never;
@@ -541,7 +557,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["cadastrar_5"];
+        post: operations["cadastrar_6"];
         delete?: never;
         options?: never;
         head?: never;
@@ -715,7 +731,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["listar_2"];
+        get: operations["listar_3"];
         put?: never;
         post?: never;
         delete?: never;
@@ -815,6 +831,22 @@ export interface paths {
         put?: never;
         post?: never;
         delete: operations["desfazer_2"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/cartoes/{cartaoId}/adicionais/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["remover"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1164,6 +1196,8 @@ export interface components {
             jaExiste: boolean;
             parecida?: components["schemas"]["ParecidaResposta"];
             /** Format: uuid */
+            pessoaAdicionalId?: string;
+            /** Format: uuid */
             pessoaSugeridaId?: string;
         };
         ParecidaResposta: {
@@ -1186,6 +1220,18 @@ export interface components {
             totalLido: number;
             totalArquivo?: number;
             itens: components["schemas"]["ItemPreviaResposta"][];
+        };
+        AdicionalPedido: {
+            ultimos4: string;
+            /** Format: uuid */
+            pessoaId: string;
+        };
+        AdicionalResposta: {
+            /** Format: uuid */
+            id: string;
+            ultimos4: string;
+            /** Format: uuid */
+            pessoaId: string;
         };
         SessaoPedido: {
             refreshToken: string;
@@ -1418,6 +1464,11 @@ export interface components {
             total: number;
             /** Format: int32 */
             quantidade: number;
+        };
+        AdicionaisResposta: {
+            /** @enum {string} */
+            trazFinal: "SIM" | "NAO" | "SEM_IMPORTACAO";
+            adicionais: components["schemas"]["AdicionalResposta"][];
         };
         BancoResposta: {
             /** @enum {string} */
@@ -2386,6 +2437,54 @@ export interface operations {
             };
         };
     };
+    listar_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cartaoId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdicionaisResposta"];
+                };
+            };
+        };
+    };
+    cadastrar_5: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cartaoId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdicionalPedido"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdicionalResposta"];
+                };
+            };
+        };
+    };
     sair: {
         parameters: {
             query?: never;
@@ -2500,7 +2599,7 @@ export interface operations {
             };
         };
     };
-    cadastrar_5: {
+    cadastrar_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -2738,7 +2837,7 @@ export interface operations {
             };
         };
     };
-    listar_2: {
+    listar_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -2880,6 +2979,27 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["DesfazerResposta"];
                 };
+            };
+        };
+    };
+    remover: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                cartaoId: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

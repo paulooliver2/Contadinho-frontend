@@ -9,6 +9,7 @@ import EstadoVazio from '@/components/EstadoVazio.vue'
 import IconeCartao from '@/components/IconeCartao.vue'
 import { useAvisos } from '@/stores/avisos'
 import { useCartoes, type Cartao } from '@/stores/cartoes'
+import AdicionaisFolha from './AdicionaisFolha.vue'
 import EditarCartaoFolha from './EditarCartaoFolha.vue'
 import FaturaCartao from './FaturaCartao.vue'
 import NovoCartaoFolha from './NovoCartaoFolha.vue'
@@ -23,6 +24,7 @@ const selecionadoId = ref<string | null>(doLink('cartao') ?? null)
 const mesDoLink = doLink('fatura')
 const folhaAberta = ref(false)
 const edicaoAberta = ref(false)
+const adicionaisAberta = ref(false)
 const aviso = ref('')
 const erroCarga = ref('')
 
@@ -89,13 +91,14 @@ function aoRemover(mensagem: string) {
         @adicionar="folhaAberta = true"
       />
       <CaixaAviso v-if="aviso" tom="sucesso" fechavel :mensagem="aviso" @fechar="aviso = ''" />
-      <ResumoCartao :cartao="selecionado" @editar="edicaoAberta = true" />
+      <ResumoCartao :cartao="selecionado" @editar="edicaoAberta = true" @adicionais="adicionaisAberta = true" />
       <FaturaCartao
         :key="`${selecionado.id}:${selecionado.diaFechamento}:${selecionado.diaVencimento}`"
         :cartao="selecionado"
         :mes-inicial="selecionado.id === doLink('cartao') ? mesDoLink : undefined"
       />
       <EditarCartaoFolha v-model:aberta="edicaoAberta" :cartao="selecionado" @salvo="aoEditar" @removido="aoRemover" />
+      <AdicionaisFolha v-model:aberta="adicionaisAberta" :cartao="selecionado" />
     </template>
 
     <NovoCartaoFolha v-model:aberta="folhaAberta" @cadastrado="aoCadastrar" />

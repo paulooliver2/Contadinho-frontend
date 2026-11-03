@@ -12,7 +12,7 @@ import { reais } from '@/lib/formatos'
 import type { Cartao } from '@/stores/cartoes'
 import { usePessoas } from '@/stores/pessoas'
 import CompraParecida from './CompraParecida.vue'
-import { importarFatura, lerArquivo, previaImportacao, type ArquivoLido, type Importacao, type Previa } from './faturas'
+import { importarFatura, lerArquivo, previaImportacao, type ArquivoLido, type Importacao, type ItemPrevia, type Previa } from './faturas'
 import LinhaLancamento from './LinhaLancamento.vue'
 
 /**
@@ -97,6 +97,13 @@ function trocarFatura(novo: string) {
 const parecidas = computed(() => previa.value?.itens.filter((i) => i.parecida) ?? [])
 const novas = computed(() => previa.value?.itens.filter((i) => !i.jaExiste && !i.parecida) ?? [])
 const sugeridas = computed(() => novas.value.filter((i) => i.pessoaSugeridaId).length)
+
+/** HU-38: a compra do adicional já vai para a pessoa dele; HU-09: a sugerida, para a de sempre. */
+function seloDe(item: ItemPrevia): string | undefined {
+  if (item.pessoaAdicionalId) return `${pessoas.rotulo(item.pessoaAdicionalId)} · adicional`
+  if (item.pessoaSugeridaId) return `${pessoas.rotulo(item.pessoaSugeridaId)} · sugerido`
+  return undefined
+}
 const jaImportadas = computed(() => previa.value?.itens.filter((i) => i.jaExiste) ?? [])
 const faltaDecidir = computed(() => Object.values(decisoes.value).some((d) => d === null))
 
@@ -177,7 +184,7 @@ async function confirmar() {
               v-for="item in novas"
               :key="item.idExterno"
               :item="item"
-              :selo="item.pessoaSugeridaId ? `${pessoas.rotulo(item.pessoaSugeridaId)} · sugerido` : undefined"
+              :selo="seloDe(item)"
             />
           </ul>
         </template>

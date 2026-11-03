@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import type { Cartao } from '@/stores/cartoes'
 
-/** Cabeçalho do cartão escolhido, com "Editar" (HU-45); a fatura vem logo abaixo, no FaturaCartao. */
+/**
+ * Cabeçalho do cartão escolhido, com "Adicionais" (HU-38) e "Editar" (HU-45); a fatura vem logo abaixo, no
+ * FaturaCartao.
+ */
 defineProps<{ cartao: Cartao }>()
-defineEmits<{ editar: [] }>()
+defineEmits<{ editar: []; adicionais: [] }>()
 </script>
 
 <template>
@@ -12,7 +15,12 @@ defineEmits<{ editar: [] }>()
       <p class="titulo">{{ cartao.apelido }} <span class="final">•• {{ cartao.ultimos4 }}</span></p>
       <p class="dias">Fecha dia {{ cartao.diaFechamento }} · vence dia {{ cartao.diaVencimento }}</p>
     </div>
-    <button type="button" class="editar" :aria-label="`Editar ${cartao.apelido}`" @click="$emit('editar')">Editar</button>
+    <div class="acoes">
+      <button type="button" class="acao" :aria-label="`Adicionais de ${cartao.apelido}`" @click="$emit('adicionais')">
+        Adicionais
+      </button>
+      <button type="button" class="acao" :aria-label="`Editar ${cartao.apelido}`" @click="$emit('editar')">Editar</button>
+    </div>
   </section>
 </template>
 
@@ -44,10 +52,14 @@ defineEmits<{ editar: [] }>()
   color: var(--texto-suave);
 }
 
-.editar {
+.acoes {
   flex: none;
+  display: flex;
+}
+
+.acao {
   min-height: var(--toque-minimo);
-  padding: 0 12px;
+  padding: 0 10px;
   border: none;
   background: transparent;
   color: var(--marca);
