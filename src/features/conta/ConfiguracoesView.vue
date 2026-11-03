@@ -9,13 +9,14 @@ import CartaoAtalho from '@/components/CartaoAtalho.vue'
 import { useAvisos } from '@/stores/avisos'
 import { useConta } from '@/stores/conta'
 import { useSessao } from '@/stores/sessao'
+import ApagarContaFolha from './ApagarContaFolha.vue'
 import BiometriaInterruptor from './BiometriaInterruptor.vue'
 import ChavePixForm from './ChavePixForm.vue'
 import ModeloCobrancaForm from './ModeloCobrancaForm.vue'
 
 /**
  * Configurações: quem está logado, a chave Pix e o modelo da mensagem das cobranças (HU-03, HU-21), os avisos
- * (Épico 6), a biometria (HU-02) e Sair.
+ * (Épico 6), a biometria (HU-02), Sair e apagar a conta (HU-04).
  */
 const router = useRouter()
 const conta = useConta()
@@ -24,6 +25,7 @@ const erroCarga = ref('')
 const erro = ref('')
 const aviso = ref('')
 const removendo = ref(false)
+const apagando = ref(false)
 
 const iniciais = computed(() => {
   const partes = (conta.conta?.nome ?? '').split(/\s+/).filter(Boolean)
@@ -117,6 +119,8 @@ async function sair() {
       <BiometriaInterruptor />
 
       <BotaoAcao variante="secundario" @click="sair">Sair</BotaoAcao>
+      <button type="button" class="apagar" @click="apagando = true">Apagar minha conta</button>
+      <ApagarContaFolha v-model:aberta="apagando" />
     </template>
 
     <p v-else class="carregando" role="status">Carregando…</p>
@@ -207,6 +211,19 @@ h3 {
   margin: -8px 0 0;
   font-size: 13px;
   color: var(--texto-suave);
+}
+
+.apagar {
+  align-self: center;
+  min-height: var(--toque-minimo);
+  padding: 0 12px;
+  border: none;
+  background: transparent;
+  color: var(--perigo);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .remover {

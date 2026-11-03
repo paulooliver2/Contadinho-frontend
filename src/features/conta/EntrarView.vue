@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { mensagemDeErro } from '@/api/erros'
 import BotaoAcao from '@/components/BotaoAcao.vue'
@@ -19,8 +19,12 @@ const email = ref('')
 const senha = ref('')
 const erro = ref('')
 const enviando = ref(false)
-/** Volta da tela de senha nova (HU-40). */
-const senhaRedefinida = route.query.senha === 'redefinida'
+/**
+ * Volta da tela de senha nova (HU-40) e de "Apagar minha conta" (HU-04). Reativos: ao perder a sessão, o App já pode
+ * ter aberto esta tela, e a volta com o aviso só muda a query.
+ */
+const senhaRedefinida = computed(() => route.query.senha === 'redefinida')
+const contaApagada = computed(() => route.query.conta === 'apagada')
 
 async function entrar() {
   if (enviando.value || !email.value || !senha.value) return
@@ -48,6 +52,7 @@ async function entrar() {
   >
     <FormularioEmpilhado @enviar="entrar">
       <CaixaAviso v-if="senhaRedefinida" tom="sucesso" mensagem="Senha alterada. Entre com a senha nova." />
+      <CaixaAviso v-if="contaApagada" tom="sucesso" mensagem="Sua conta foi apagada." />
       <CampoTexto v-model="email" rotulo="E-mail" tipo="email" autocomplete="email" placeholder="voce@email.com" />
       <CampoTexto v-model="senha" rotulo="Senha" tipo="password" autocomplete="current-password" placeholder="Sua senha" />
       <RouterLink :to="{ name: 'recuperar-senha' }" class="esqueci">Esqueci a senha</RouterLink>

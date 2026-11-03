@@ -82,6 +82,12 @@ export const useSessao = defineStore('sessao', () => {
     await cofre.apagarRefresh()
   }
 
+  /** HU-04: a conta foi apagada; o aparelho esquece a sessão, a biometria e o e-mail, sem falar com o servidor. */
+  async function esquecerAparelho() {
+    await encerrar()
+    await cofre.apagarBiometria()
+  }
+
   async function sair() {
     const refreshToken = await cofre.lerRefresh()
     await encerrar()
@@ -93,7 +99,7 @@ export const useSessao = defineStore('sessao', () => {
     }
   }
 
-  return { tokenAcesso, logado, entrar, cadastrar, tokenValido, restaurar, encerrar, sair }
+  return { tokenAcesso, logado, entrar, cadastrar, tokenValido, restaurar, encerrar, esquecerAparelho, sair }
 })
 
 /** exp - iat do JWT. Não depende do relógio do aparelho bater com o do servidor. */

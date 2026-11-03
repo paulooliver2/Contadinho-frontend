@@ -51,5 +51,15 @@ export const useConta = defineStore('conta', () => {
     },
   )
 
-  return { conta, carregar, salvarPix, removerPix, salvarModeloCobranca }
+  /**
+   * HU-04: apaga a conta e tudo dela no servidor, confirmando com a senha. Senha errada é ErroApi com
+   * `campos.senha`. Dá certo: o aparelho esquece a conta (a sessão já não existe no servidor).
+   */
+  async function apagar(senha: string) {
+    const { error, response } = await api.DELETE('/api/conta', { body: { senha } })
+    if (!response.ok) throw erroDaApi(error, response)
+    await useSessao().esquecerAparelho()
+  }
+
+  return { conta, carregar, salvarPix, removerPix, salvarModeloCobranca, apagar }
 })

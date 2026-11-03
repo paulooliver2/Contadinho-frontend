@@ -734,7 +734,7 @@ export interface paths {
         get: operations["eu"];
         put?: never;
         post?: never;
-        delete?: never;
+        delete: operations["apagar"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1517,6 +1517,9 @@ export interface components {
             /** Format: uuid */
             id?: string;
             mes?: string;
+        };
+        ApagarPedido: {
+            senha: string;
         };
     };
     responses: never;
@@ -2881,6 +2884,28 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Conta"];
                 };
+            };
+        };
+    };
+    apagar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApagarPedido"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
