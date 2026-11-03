@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useSessao } from '@/stores/sessao'
+import { useTrava } from '@/stores/trava'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -39,6 +40,8 @@ router.beforeEach(async (to) => {
   const sessao = useSessao()
   // Na primeira navegação, tenta entrar com o refresh token guardado no aparelho.
   await sessao.restaurar()
+  // HU-02: decide o bloqueio antes da primeira tela, para nenhum valor aparecer antes.
+  await useTrava().iniciar()
   if (to.meta.acesso === 'livre') return
   if (to.meta.acesso === 'visitante') {
     if (sessao.logado) return { name: 'inicio' }

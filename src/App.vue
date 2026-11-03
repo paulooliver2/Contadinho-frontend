@@ -3,14 +3,23 @@ import { computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import TabBar from '@/components/TabBar.vue'
 import ExplicacaoAvisosFolha from '@/features/avisos/ExplicacaoAvisosFolha.vue'
+import OfertaBiometriaFolha from '@/features/conta/OfertaBiometriaFolha.vue'
+import TelaBloqueio from '@/features/conta/TelaBloqueio.vue'
 import { aoTocar } from '@/lib/notificacoes'
 import { useAvisos } from '@/stores/avisos'
 import { useSessao } from '@/stores/sessao'
+import { useTrava } from '@/stores/trava'
 
 const route = useRoute()
 const router = useRouter()
 const sessao = useSessao()
+const trava = useTrava()
 const comAbas = computed(() => route.meta.abas === true)
+/**
+ * HU-02: bloqueado, em segundo plano ou com a sessão encerrada numa tela da conta (até chegar no login), o app some
+ * da tela e do leitor de tela, mas o estado das telas continua.
+ */
+const escondido = computed(() => trava.bloqueado || trava.coberto || (!sessao.logado && !route.meta.acesso))
 // Cria o store já na abertura: é ele que reagenda os avisos quando a sessão começa (HU-29.2).
 useAvisos()
 
@@ -26,18 +35,22 @@ aoTocar(({ tela, id, mes }) => {
 watch(
   () => sessao.logado,
   (logado) => {
-    if (!logado && !route.meta.acesso) router.replace({ name: 'entrar' })
+    if (logado) return
+    trava.esquecer()
+    if (!route.meta.acesso) router.replace({ name: 'entrar' })
   },
 )
 </script>
 
 <template>
-  <div class="app">
+  <TelaBloqueio v-if="trava.bloqueado" />
+  <div v-show="!escondido" class="app" :inert="escondido">
     <main class="conteudo">
       <RouterView />
     </main>
     <TabBar v-if="comAbas" />
     <ExplicacaoAvisosFolha />
+    <OfertaBiometriaFolha />
   </div>
 </template>
 

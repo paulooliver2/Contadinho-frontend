@@ -8,10 +8,12 @@ import CampoTexto from '@/components/CampoTexto.vue'
 import FormularioEmpilhado from '@/components/FormularioEmpilhado.vue'
 import TelaAcesso from '@/components/TelaAcesso.vue'
 import { useSessao } from '@/stores/sessao'
+import { useTrava } from '@/stores/trava'
 
 const route = useRoute()
 const router = useRouter()
 const sessao = useSessao()
+const trava = useTrava()
 
 const email = ref('')
 const senha = ref('')
@@ -26,6 +28,8 @@ async function entrar() {
   enviando.value = true
   try {
     await sessao.entrar(email.value, senha.value)
+    // HU-02: oferece a biometria logo depois do login com senha (RN-05).
+    await trava.oferecer(email.value).catch(() => undefined)
     await router.replace(typeof route.query.voltar === 'string' ? route.query.voltar : '/')
   } catch (e) {
     erro.value = mensagemDeErro(e)

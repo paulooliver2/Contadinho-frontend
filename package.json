@@ -18,10 +18,13 @@
     "android:run": "npm run build && cap run android"
   },
   "dependencies": {
+    "@aparajita/capacitor-biometric-auth": "^10.0.0",
     "@aparajita/capacitor-secure-storage": "^8.0.1",
     "@capacitor-community/contacts": "^8.0.0",
     "@capacitor/android": "^8.6.0",
+    "@capacitor/app": "^8.1.2",
     "@capacitor/core": "^8.6.0",
+    "@capacitor/ios": "^8.6.0",
     "@capacitor/local-notifications": "^8.3.1",
     "@fontsource/ibm-plex-mono": "^5.3.0",
     "@fontsource/instrument-sans": "^5.3.0",

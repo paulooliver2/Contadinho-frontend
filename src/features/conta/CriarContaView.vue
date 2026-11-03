@@ -10,6 +10,7 @@ import RegrasSenha from '@/components/RegrasSenha.vue'
 import TelaAcesso from '@/components/TelaAcesso.vue'
 import { regrasDaSenha } from '@/lib/senha'
 import { useSessao } from '@/stores/sessao'
+import { useTrava } from '@/stores/trava'
 
 const router = useRouter()
 const sessao = useSessao()
@@ -33,6 +34,7 @@ async function criar() {
   enviando.value = true
   try {
     await sessao.cadastrar(nome.value, email.value, senha.value)
+    await useTrava().oferecer(email.value).catch(() => undefined)
     await router.replace('/')
   } catch (e) {
     if (e instanceof ErroApi && e.status === 409) {

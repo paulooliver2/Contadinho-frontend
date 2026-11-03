@@ -85,6 +85,8 @@ export const useSessao = defineStore('sessao', () => {
   async function sair() {
     const refreshToken = await cofre.lerRefresh()
     await encerrar()
+    // HU-02: a escolha da biometria e o e-mail são deste dono neste aparelho.
+    await cofre.apagarBiometria()
     if (refreshToken) {
       // Revoga no servidor; se não houver rede, a sessão vence sozinha em 30 dias.
       apiAberta.POST('/api/auth/sair', { body: { refreshToken } }).catch(() => undefined)

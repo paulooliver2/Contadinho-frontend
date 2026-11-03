@@ -9,12 +9,13 @@ import CartaoAtalho from '@/components/CartaoAtalho.vue'
 import { useAvisos } from '@/stores/avisos'
 import { useConta } from '@/stores/conta'
 import { useSessao } from '@/stores/sessao'
+import BiometriaInterruptor from './BiometriaInterruptor.vue'
 import ChavePixForm from './ChavePixForm.vue'
 import ModeloCobrancaForm from './ModeloCobrancaForm.vue'
 
 /**
  * Configurações: quem está logado, a chave Pix e o modelo da mensagem das cobranças (HU-03, HU-21), os avisos
- * (Épico 6) e Sair.
+ * (Épico 6), a biometria (HU-02) e Sair.
  */
 const router = useRouter()
 const conta = useConta()
@@ -112,6 +113,8 @@ async function sair() {
       <CartaoAtalho titulo="Avisos" :detalhe="estadoAvisos" :para="{ name: 'avisos' }">
         <span class="ajuda">Vencimento das contas fixas, fechamento das faturas e quem ainda deve.</span>
       </CartaoAtalho>
+
+      <BiometriaInterruptor />
 
       <BotaoAcao variante="secundario" @click="sair">Sair</BotaoAcao>
     </template>
