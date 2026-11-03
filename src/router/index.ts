@@ -31,6 +31,8 @@ export const router = createRouter({
     { path: '/receitas', name: 'receitas', component: () => import('@/features/receitas/ReceitasView.vue'), meta: { abas: true, aba: 'inicio' } },
     { path: '/configuracoes', name: 'configuracoes', component: () => import('@/features/conta/ConfiguracoesView.vue'), meta: { abas: true, aba: 'inicio' } },
     { path: '/avisos', name: 'avisos', component: () => import('@/features/avisos/AvisosView.vue'), meta: { abas: true, aba: 'inicio' } },
+    { path: '/carteira', name: 'carteira', component: () => import('@/features/carteira/CarteiraView.vue'), meta: { abas: true } },
+    { path: '/carteira/:id', name: 'posicao', component: () => import('@/features/carteira/PosicaoView.vue'), props: true, meta: { abas: true, aba: 'carteira' } },
     { path: '/receber/:id', name: 'pessoa', component: () => import('@/features/receber/PessoaView.vue'), props: true, meta: { abas: true, aba: 'receber' } },
     { path: '/:caminho(.*)*', redirect: '/' },
   ],

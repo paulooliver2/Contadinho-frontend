@@ -25,6 +25,8 @@ const emit = defineEmits<{ abrir: [] }>()
       </span>
       <span class="direita">
         <span class="valor">{{ valor }}</span>
+        <!-- Uma linha a mais embaixo do valor, como o ganho de um investimento. -->
+        <slot name="abaixo" />
         <span v-if="selo" class="selo" :class="selo.tom">{{ selo.texto }}</span>
       </span>
     </button>

@@ -324,6 +324,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/investimentos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["carteira"];
+        put?: never;
+        post: operations["cadastrar_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/investimentos/{id}/movimentacoes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["movimentar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/investimentos/atualizar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["atualizar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/gastos": {
         parameters: {
             query?: never;
@@ -333,7 +381,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["cadastrar_2"];
+        post: operations["cadastrar_3"];
         delete?: never;
         options?: never;
         head?: never;
@@ -349,7 +397,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["cadastrar_3"];
+        post: operations["cadastrar_4"];
         delete?: never;
         options?: never;
         head?: never;
@@ -397,7 +445,7 @@ export interface paths {
         };
         get: operations["listar_1"];
         put?: never;
-        post: operations["cadastrar_4"];
+        post: operations["cadastrar_5"];
         delete?: never;
         options?: never;
         head?: never;
@@ -477,7 +525,7 @@ export interface paths {
         };
         get: operations["listar_2"];
         put?: never;
-        post: operations["cadastrar_5"];
+        post: operations["cadastrar_6"];
         delete?: never;
         options?: never;
         head?: never;
@@ -573,7 +621,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["cadastrar_6"];
+        post: operations["cadastrar_7"];
         delete?: never;
         options?: never;
         head?: never;
@@ -652,6 +700,38 @@ export interface paths {
             cookie?: never;
         };
         get: operations["historico"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/investimentos/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["detalhe"];
+        put?: never;
+        post?: never;
+        delete: operations["excluir_5"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/investimentos/cripto": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["buscarCripto"];
         put?: never;
         post?: never;
         delete?: never;
@@ -830,7 +910,23 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        delete: operations["excluir_5"];
+        delete: operations["excluir_6"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/investimentos/{id}/movimentacoes/{movimentacaoId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["excluirMovimentacao"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1160,6 +1256,124 @@ export interface components {
             /** Format: date */
             vencimento?: string;
         };
+        NovoInvestimento: {
+            /** @enum {string} */
+            tipo?: "ACAO" | "CRIPTO" | "TESOURO" | "RENDA_FIXA";
+            codigo?: string;
+            quantidade?: number;
+            preco?: number;
+            valor?: number;
+            /** @enum {string} */
+            tesouroTipo?: "SELIC" | "IPCA" | "IPCA_JUROS" | "PREFIXADO" | "PREFIXADO_JUROS" | "RENDA_MAIS" | "EDUCA_MAIS";
+            /** Format: int32 */
+            tesouroAno?: number;
+            /** @enum {string} */
+            produto?: "CDB" | "LCI" | "LCA";
+            emissor?: string;
+            /** @enum {string} */
+            indexador?: "CDI" | "PREFIXADO";
+            taxa?: number;
+            /** Format: date */
+            dataAplicacao?: string;
+            /** Format: date */
+            vencimento?: string;
+        };
+        MovimentacaoResposta: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            tipo: "INICIAL" | "APORTE" | "RESGATE";
+            /** Format: date */
+            data: string;
+            quantidade?: number;
+            preco?: number;
+            valor?: number;
+            total: boolean;
+        };
+        PosicaoDetalhe: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            tipo: "ACAO" | "CRIPTO" | "TESOURO" | "RENDA_FIXA";
+            codigo: string;
+            nome?: string;
+            simbolo?: string;
+            /** @enum {string} */
+            produto?: "CDB" | "LCI" | "LCA";
+            /** @enum {string} */
+            indexador?: "CDI" | "PREFIXADO";
+            taxa?: number;
+            /** Format: date */
+            vencimento?: string;
+            conferido: boolean;
+            quantidade?: number;
+            precoMedio?: number;
+            aplicado: number;
+            encerrada: boolean;
+            aplicadoInicial: number;
+            valorAtual?: number;
+            ganho?: number;
+            ganhoPercentual?: number;
+            cotacao?: number;
+            /** Format: date-time */
+            atualizadoEm?: string;
+            /** Format: date */
+            cdiAte?: string;
+            desatualizado: boolean;
+            resultado?: number;
+            movimentacoes: components["schemas"]["MovimentacaoResposta"][];
+        };
+        NovaMovimentacao: {
+            /** @enum {string} */
+            tipo?: "INICIAL" | "APORTE" | "RESGATE";
+            /** Format: date */
+            data?: string;
+            quantidade?: number;
+            preco?: number;
+            valor?: number;
+            total?: boolean;
+        };
+        Carteira: {
+            totalAplicado: number;
+            patrimonio: number;
+            ganho: number;
+            ganhoPercentual?: number;
+            /** Format: int32 */
+            semCotacao: number;
+            posicoes: components["schemas"]["PosicaoResumo"][];
+        };
+        PosicaoResumo: {
+            /** Format: uuid */
+            id: string;
+            /** @enum {string} */
+            tipo: "ACAO" | "CRIPTO" | "TESOURO" | "RENDA_FIXA";
+            codigo: string;
+            nome?: string;
+            simbolo?: string;
+            /** @enum {string} */
+            produto?: "CDB" | "LCI" | "LCA";
+            /** @enum {string} */
+            indexador?: "CDI" | "PREFIXADO";
+            taxa?: number;
+            /** Format: date */
+            vencimento?: string;
+            conferido: boolean;
+            quantidade?: number;
+            precoMedio?: number;
+            aplicado: number;
+            encerrada: boolean;
+            aplicadoInicial: number;
+            valorAtual?: number;
+            ganho?: number;
+            ganhoPercentual?: number;
+            cotacao?: number;
+            /** Format: date-time */
+            atualizadoEm?: string;
+            /** Format: date */
+            cdiAte?: string;
+            desatualizado: boolean;
+            resultado?: number;
+        };
         PagamentoContaPedido: {
             /** Format: date */
             pagoEm?: string;
@@ -1413,6 +1627,11 @@ export interface components {
             /** Format: date */
             vencimento?: string;
             emAberto: number;
+        };
+        CriptoEncontrada: {
+            id: string;
+            simbolo: string;
+            nome: string;
         };
         DesfazerResposta: {
             /** Format: uuid */
@@ -2226,7 +2445,97 @@ export interface operations {
             };
         };
     };
+    carteira: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Carteira"];
+                };
+            };
+        };
+    };
     cadastrar_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NovoInvestimento"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PosicaoDetalhe"];
+                };
+            };
+        };
+    };
+    movimentar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NovaMovimentacao"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PosicaoDetalhe"];
+                };
+            };
+        };
+    };
+    atualizar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Carteira"];
+                };
+            };
+        };
+    };
+    cadastrar_3: {
         parameters: {
             query?: never;
             header?: never;
@@ -2250,7 +2559,7 @@ export interface operations {
             };
         };
     };
-    cadastrar_3: {
+    cadastrar_4: {
         parameters: {
             query?: never;
             header?: never;
@@ -2364,7 +2673,7 @@ export interface operations {
             };
         };
     };
-    cadastrar_4: {
+    cadastrar_5: {
         parameters: {
             query?: never;
             header?: never;
@@ -2509,7 +2818,7 @@ export interface operations {
             };
         };
     };
-    cadastrar_5: {
+    cadastrar_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -2649,7 +2958,7 @@ export interface operations {
             };
         };
     };
-    cadastrar_6: {
+    cadastrar_7: {
         parameters: {
             query?: never;
             header?: never;
@@ -2775,6 +3084,70 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HistoricoResposta"];
+                };
+            };
+        };
+    };
+    detalhe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PosicaoDetalhe"];
+                };
+            };
+        };
+    };
+    excluir_5: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    buscarCripto: {
+        parameters: {
+            query?: {
+                busca?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CriptoEncontrada"][];
                 };
             };
         };
@@ -3012,7 +3385,7 @@ export interface operations {
             };
         };
     };
-    excluir_5: {
+    excluir_6: {
         parameters: {
             query?: never;
             header?: never;
@@ -3029,6 +3402,29 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    excluirMovimentacao: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                movimentacaoId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PosicaoDetalhe"];
+                };
             };
         };
     };
